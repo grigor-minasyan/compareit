@@ -1,13 +1,9 @@
-import { type ReviewsResponse } from "~/types";
-
 export const productIdsToTest = [
   "16600916593715927928",
   "113030043680409970",
 ] as const;
 
-export const reviews: {
-  [key: string]: ReviewsResponse;
-} = {
+export const reviews: Record<string, unknown> = {
   "16600916593715927928": {
     status: "OK",
     request_id: "c0d983d0-c26e-4a0c-94da-b13cde3c807f",
@@ -34,7 +30,7 @@ export const reviews: {
         review_source_url:
           "http://reviews.walmart.com/1336/15056050/review/254627107/redirect.htm",
         review_text:
-          "I've used alot of drain cleaners over the years, and this one is the best. I have a bathroom sink in my apt. that tends to run slow if I don't keep up with maintenance. Some products don't do the job, this one cleared the drain completely. I was impressed. I let the foam sit for an hour, then poured 2 pots of hot water down the drain, and the sink drained quickly after the 2nd pot of hot water. The drainage has been clear ever since. This is the only brand, with pro strength foam, that I will use from now on.",
+          "I tried Liquid-Plumr Foaming Clog Destroyer on a slow flow sink, because my usual product was sold out. The issue is unkown, but believed to be large objects getting stuck in the drain, slowing the flow. This product did absolutely nothing for me. Not even a temporary fix. I bought Liquid-Plumr Urgent clear (the product I usually use), the next day and worked like a charm. Honestly, I don't know if this product is good for any specific issue, but Urgent Clear has worked for me for many different types of clogs on both Tubs and sinks in houses and apartments without any issues at all. And Urgent clear is much faster than this product. I would advise this company to ditch this product and produce more Urgent Clears.",
         rating: 5,
         review_datetime_utc: "2021-03-07T00:00:00.000Z",
         review_language: "en",
@@ -2845,4 +2841,4 @@ export const reviews: {
       },
     ],
   },
-} as const;
+};

@@ -1,17 +1,16 @@
 import { type GetStaticPaths, type GetStaticProps } from "next";
-import { revalidationTimersInSec } from "~/constants";
-import { productIdsToTest, reviews } from "~/constants/productReviews";
-import { productSearchResults } from "~/constants/productSearch";
+import { AMAZON_STORE_ID, revalidationTimersInSec } from "~/constants";
 import { runPrompt } from "~/server/openai";
+import {
+  runFilteredProductSearch,
+  runFilteredReviewSearch,
+} from "~/server/productApi";
 
 import {
   createProductFromSearchDataAndReviews,
-  doesProductDescriptionNeedToBeShortened,
+  shortenProductDescIfNeeded,
 } from "~/utils/productUtils";
-import {
-  generatePromptFromProducts,
-  generatePromptToShortenProductDesc,
-} from "~/utils/promptUtils";
+import { generatePromptFromProducts } from "~/utils/promptUtils";
 
 type Param = {
   jointId: string;
@@ -19,14 +18,16 @@ type Param = {
 type Props = {
   // product: Product;
   prompt: string;
+  summary: string;
 } & Param;
 
-export default function Comparison({ jointId, prompt }: Props) {
+export default function Comparison({ jointId, prompt, summary }: Props) {
   return (
     <article>
       <h1 className="text-4xl">Article {jointId}</h1>
 
       <p className="whitespace-pre-line">{prompt}</p>
+      <p className="whitespace-pre-line">{summary}</p>
       {/* {JSON.stringify(product, null, 2)} */}
     </article>
   );
@@ -34,19 +35,24 @@ export default function Comparison({ jointId, prompt }: Props) {
 
 export const getStaticProps: GetStaticProps<Props> = async (context) => {
   const { jointId } = context.params as Param;
-  if (jointId === "2") {
-    return {
-      notFound: true,
-      revalidate: revalidationTimersInSec.jointComparison,
-    };
+  if (!jointId || !jointId.includes("-vs-")) {
+    return { notFound: true };
   }
 
-  const prod1 = productSearchResults.data.find(
-    (p) => p.product_id === productIdsToTest[0]
-  );
-  const prod2 = productSearchResults.data.find(
-    (p) => p.product_id === productIdsToTest[1]
-  );
+  // split the jointId into two productIds split by -vs-
+  const productIds = jointId.split("-vs-");
+  if (productIds.length !== 2) {
+    return { notFound: true };
+  }
+  productIds.sort((a, b) => a.localeCompare(b));
+  const [prodId1, prodId2] = productIds;
+  if (!prodId1 || !prodId2) {
+    return { notFound: true };
+  }
+  const prodSearchResult = await runFilteredProductSearch("test");
+
+  const prod1 = prodSearchResult.find((p) => p.product_id === prodId1);
+  const prod2 = prodSearchResult.find((p) => p.product_id === prodId2);
   if (!prod1 || !prod2) {
     return {
       notFound: true,
@@ -54,37 +60,33 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
     };
   }
 
-  const reviews1 = reviews[productIdsToTest[0]].data;
-  const reviews2 = reviews[productIdsToTest[1]].data;
+  const [reviews1, reviews2] = await Promise.all([
+    runFilteredReviewSearch(prodId1),
+    runFilteredReviewSearch(prodId2),
+  ]);
 
-  if (doesProductDescriptionNeedToBeShortened(prod1)) {
-    console.time("prompt1");
-    try {
-      prod1.description = await runPrompt(
-        generatePromptToShortenProductDesc(prod1)
-      );
-    } catch (e) {
-      console.error(e?.toString?.());
-    }
-    console.timeEnd("prompt1");
-  }
+  await Promise.all([prod1, prod2].map(shortenProductDescIfNeeded));
 
-  // if (doesProductDescriptionNeedToBeShortened(prod2)) {
-  //   console.time("prompt2");
-  //   prod2.description = await runPrompt(
-  //     generatePromptToShortenProductDesc(prod2)
-  //   );
-  //   console.timeEnd("prompt2");
-  // }
-  const prod1Clean = createProductFromSearchDataAndReviews(prod1, reviews1);
-  const prod2Clean = createProductFromSearchDataAndReviews(prod2, reviews1);
+  const prod1Clean = createProductFromSearchDataAndReviews(
+    prod1,
+    reviews1,
+    AMAZON_STORE_ID
+  );
+  const prod2Clean = createProductFromSearchDataAndReviews(
+    prod2,
+    reviews2,
+    AMAZON_STORE_ID
+  );
 
   const prompt = generatePromptFromProducts([prod1Clean, prod2Clean]);
+
+  const summary = await runPrompt(prompt);
 
   return {
     props: {
       jointId,
       prompt,
+      summary,
     },
     revalidate: revalidationTimersInSec.jointComparison,
   };

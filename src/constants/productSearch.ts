@@ -1,8 +1,4 @@
-import { type ProductSearchResponse } from "~/types";
-
-export const AMAZON_STORE_ID = "g113872638";
-
-export const productSearchResults: ProductSearchResponse = {
+export const productSearchResults = {
   status: "OK",
   request_id: "6f7f7e30-a217-4395-a9e6-39684415808a",
   data: [
@@ -1344,4 +1340,4 @@ export const productSearchResults: ProductSearchResponse = {
       },
     },
   ],
-};
+} as const;
