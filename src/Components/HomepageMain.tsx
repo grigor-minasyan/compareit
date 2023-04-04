@@ -36,7 +36,7 @@ const SearchInput = ({
           onChange={onChange}
           type="search"
           name="Search"
-          className="w-full rounded-xl bg-gray-100 py-3 pl-10 pr-4 text-sm text-gray-800 focus:border-violet-600 focus:bg-gray-50 focus:outline-violet-900"
+          className="w-full rounded-xl bg-gray-100 py-3 pl-10 pr-4 text-sm text-gray-800 focus:bg-gray-50 focus:ring-violet-900"
         />
       </div>
     </fieldset>
