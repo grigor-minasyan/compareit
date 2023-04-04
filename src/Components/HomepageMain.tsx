@@ -1,4 +1,5 @@
 import { type ChangeEventHandler, useState } from "react";
+import { StarIcon } from "@heroicons/react/24/solid";
 
 const SearchInput = ({
   placeholder,
@@ -10,11 +11,11 @@ const SearchInput = ({
   onChange: ChangeEventHandler<HTMLInputElement>;
 }) => {
   return (
-    <fieldset className="m-2 w-auto space-y-1 text-gray-800 md:w-full">
+    <fieldset className="mx-0 my-1 w-auto text-gray-800 md:m-2 md:w-full">
       <label htmlFor="Search" className="hidden">
         Search
       </label>
-      <div className="relative">
+      <div className="relative my-1">
         <span className="absolute inset-y-0 left-0 flex items-center pl-2">
           <button
             type="button"
@@ -54,7 +55,7 @@ const SearchButton = ({
 }) => {
   return (
     <button
-      className={`my-2.5 w-full rounded-xl px-8 py-2 text-white md:w-80 ${
+      className={`my-2 w-full rounded-xl px-8 py-2.5 text-white md:w-80 lg:my-0 ${
         disabled
           ? "cursor-not-allowed bg-gray-300"
           : "bg-violet-500 hover:bg-violet-700"
@@ -76,21 +77,22 @@ const SearchResult = ({
 }) => {
   return (
     <div className="flex flex-row items-center">
-      <div className="m-2 h-20 w-20 flex-shrink-0 ">
+      <div className="m-2 h-20 w-20 flex-shrink-0">
         <img
-          src="https://picsum.photos/200/300"
+          src="https://picsum.photos/200/200"
           alt=""
-          className="h-full w-full rounded bg-gray-500 object-cover object-center"
+          className="h-full w-full rounded-xl bg-gray-500 object-cover object-center"
         />
       </div>
       <div className="flex flex-col">
         <h2 className="mb-1 text-lg font-bold">{productName}</h2>
-        <p className="mb-0 text-sm">
-          <span className="">Reviews:</span> 4,567
-        </p>
-        <p className="mb-0 text-sm">
-          <span className="">Rating:</span> 4.5/5
-        </p>
+        <div className="flex flex-row items-center">
+          <StarIcon width={20} className="text-violet-900" />
+          <p>
+            <span className="mb-0 text-sm">{"4.5 "}</span>
+            <span className="text-xs text-slate-400">{"(4570)"}</span>
+          </p>
+        </div>
       </div>
       <button
         className={
@@ -162,7 +164,7 @@ export function HomePage() {
         <p className="mb-8 max-w-2xl text-center text-lg">
           {`Compare any two products using real reviews and ratings from users. Just enter the names of the products below and click "Search".`}
         </p>
-        <div className="mb-4 flex w-full max-w-3xl flex-col align-middle md:flex-row">
+        <div className="mb-4 flex w-full max-w-3xl flex-col align-middle md:flex-row md:items-center">
           <SearchInput
             value={product1name}
             placeholder="Product 1"
@@ -180,7 +182,7 @@ export function HomePage() {
           />
         </div>
         {loading && <LoadingBar />}
-        <div className="mb-4 mt-8 w-full">
+        <div className="my-4 w-full max-w-3xl">
           {product1name && (
             <SearchResult
               productName={product1name}
