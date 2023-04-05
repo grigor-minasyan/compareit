@@ -60,10 +60,28 @@ const handler = async (req: Request): Promise<Response> => {
     presence_penalty: 2,
     stream: true,
     n: 1,
+    max_tokens: 100,
   };
 
   const stream = await OpenAIStream(payload);
   return new Response(stream);
+
+  // const [streamA, streamB] = (await OpenAIStream(payload)).tee();
+  // new Promise<void>((res, rej) => {
+  //   const testFn = async () => {
+  //     while (true) {
+  //       const readerB = streamB.getReader();
+  //       const result = await readerB.read();
+  //       if (result.done) break;
+  //       console.log("[B]", result);
+  //     }
+  //     res();
+  //   };
+
+  //   testFn().catch(rej);
+  // }).catch((e) => console.error(e));
+
+  // TODO use .tee() or something to also save the data in the db
 };
 
 export default handler;

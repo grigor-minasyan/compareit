@@ -20,6 +20,7 @@ export interface OpenAIStreamPayload {
   presence_penalty: number;
   stream: boolean;
   n: number;
+  max_tokens?: number;
 }
 
 export async function OpenAIStream(payload: OpenAIStreamPayload) {
