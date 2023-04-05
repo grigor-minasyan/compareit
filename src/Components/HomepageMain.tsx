@@ -168,6 +168,7 @@ export function HomePage() {
 
   const handleRunComparisonClick = async () => {
     setIsComparisonRunning(true);
+    setComparisonResult("");
     const response = await fetch("/api/generateComparison", {
       method: "POST",
       headers: {

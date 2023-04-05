@@ -53,35 +53,37 @@ const handler = async (req: Request): Promise<Response> => {
 
   const payload: OpenAIStreamPayload = {
     model: "gpt-3.5-turbo",
-    messages: [{ role: "user", content: prompt }],
+    messages: [{ role: "user", content: "tell me a joke " || prompt }], // TODO put the actual prompt here
     temperature: 0.6,
     top_p: 1,
     frequency_penalty: 0,
     presence_penalty: 2,
     stream: true,
     n: 1,
-    max_tokens: 100,
+    max_tokens: 10, // TODO remove the max tokens
   };
 
-  const stream = await OpenAIStream(payload);
+  const [stream, stream2] = (await OpenAIStream(payload)).tee();
+  // Create a new reader for the stream
+  const reader = stream2.getReader();
+
+  // Log data as it is being streamed
+  (async () => {
+    const decoder = new TextDecoder();
+    let finalVal = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      const chunkValue = decoder.decode(value);
+      console.log(chunkValue);
+      finalVal += chunkValue;
+      if (done) {
+        break;
+      }
+    }
+    console.log(finalVal);
+  })().catch((e) => console.error(e));
+
   return new Response(stream);
-
-  // const [streamA, streamB] = (await OpenAIStream(payload)).tee();
-  // new Promise<void>((res, rej) => {
-  //   const testFn = async () => {
-  //     while (true) {
-  //       const readerB = streamB.getReader();
-  //       const result = await readerB.read();
-  //       if (result.done) break;
-  //       console.log("[B]", result);
-  //     }
-  //     res();
-  //   };
-
-  //   testFn().catch(rej);
-  // }).catch((e) => console.error(e));
-
-  // TODO use .tee() or something to also save the data in the db
 };
 
 export default handler;
