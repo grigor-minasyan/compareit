@@ -5,19 +5,13 @@ import type {
   ZReviewSearchData,
 } from "./utils/zodValidations";
 
-export type Review = {
-  id: string;
-  rating: number;
-  comment: string;
-};
-
 export type Product = {
   id: string;
   title: string;
   slug: string;
   rating: number;
   description: string;
-  reviews: Review[];
+  reviews: string[];
   storeId: string;
 };
 

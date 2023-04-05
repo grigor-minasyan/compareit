@@ -1,5 +1,7 @@
 import { type ChangeEventHandler, useState } from "react";
 import { StarIcon } from "@heroicons/react/24/solid";
+import { api } from "~/utils/api";
+import type { ProductSearchData } from "~/types";
 
 const SearchInput = ({
   placeholder,
@@ -69,39 +71,60 @@ const SearchButton = ({
 };
 
 const SearchResult = ({
-  productName,
+  product,
+  isSelected,
   handleProductSelect,
 }: {
-  productName: string;
+  product: ProductSearchData;
+  isSelected: boolean;
   handleProductSelect: (s: string) => void;
 }) => {
   return (
     <div className="flex flex-row items-center">
-      <div className="m-2 h-20 w-20 flex-shrink-0">
+      <div className="w-1/5 flex-shrink-0 p-2">
         <img
-          src="https://picsum.photos/200/200"
+          src={product.product_photos[0]}
           alt=""
-          className="h-full w-full rounded-xl bg-gray-500 object-cover object-center"
+          className="aspect-square h-full w-full rounded-xl border border-violet-900 bg-gray-500 bg-transparent object-contain object-center"
         />
       </div>
-      <div className="flex flex-col">
-        <h2 className="mb-1 text-lg font-bold">{productName}</h2>
+      <div className="flex w-3/5 flex-col">
+        <h2 className="mb-1 truncate text-lg font-bold">
+          {product.product_title}
+        </h2>
         <div className="flex flex-row items-center">
-          <StarIcon width={20} className="text-violet-900" />
+          <StarIcon width={20} className="mr-1 text-violet-900" />
           <p>
-            <span className="mb-0 text-sm">{"4.5 "}</span>
-            <span className="text-xs text-slate-400">{"(4570)"}</span>
+            <span className="mb-0 mr-1 text-sm">{product.product_rating}</span>
+            <span className="text-xs text-slate-400">{`(${product.product_num_reviews})`}</span>
           </p>
         </div>
       </div>
-      <button
-        className={
-          "rounded bg-violet-500 px-4 py-2 text-white hover:bg-violet-700"
-        }
-        onClick={() => handleProductSelect(productName)}
-      >
-        Select
-      </button>
+      <div className="flex w-1/5 flex-row justify-around">
+        {isSelected ? (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="h-10 w-10 text-violet-500"
+          >
+            <path
+              fillRule="evenodd"
+              d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+              clipRule="evenodd"
+            />
+          </svg>
+        ) : (
+          <button
+            className={
+              "rounded bg-violet-500 px-4 py-2 text-white hover:bg-violet-700"
+            }
+            onClick={() => handleProductSelect(product.product_id)}
+          >
+            Select
+          </button>
+        )}
+      </div>
     </div>
   );
 };
@@ -121,40 +144,56 @@ const LoadingBar = () => {
 export function HomePage() {
   const [product1name, setProduct1name] = useState("");
   const [product2name, setProduct2name] = useState("");
-  const [product1Results, setProduct1Results] = useState([]);
-  const [product2Results, setProduct2Results] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [comparisonResult, setComparisonResult] = useState(null);
+
+  const [product1Res, setProduct1Res] = useState<ProductSearchData[]>([]);
+  const [product2Res, setProduct2Res] = useState<ProductSearchData[]>([]);
+
+  const [product1SelectedId, setProduct1SelectedId] = useState("");
+  const [product2SelectedId, setProduct2SelectedId] = useState("");
+
+  const [comparisonResult, setComparisonResult] = useState("");
+  const [isComparisonLoading, setIsComparisonRunning] = useState(false);
   const isSearchDisabled = !product1name || !product2name;
+  const searchMut = api.home.searchProducts.useMutation({
+    onSuccess(data) {
+      data[0] && setProduct1Res(data[0]);
+      data[1] && setProduct2Res(data[1]);
+    },
+  });
+  const loading = searchMut.isLoading;
 
   const handleSearchClick = () => {
-    setLoading(true);
-    // Add your code for product search here
-    // Once the search is complete, you can set the products using setProduct1 and setProduct2
-    setLoading(false);
+    searchMut.mutate([product1name, product2name]);
   };
 
-  const handleRunComparisonClick = () => {
-    setLoading(true);
-    // Add your code for comparison here
-    // Once the comparison is complete, you can set the result using setComparisonResult
-    setLoading(false);
-  };
-
-  const handleProduct1Select = (product) => {
-    if (product === product1name) {
-      setProduct1name(null);
-    } else {
-      setProduct1name(product);
+  const handleRunComparisonClick = async () => {
+    setIsComparisonRunning(true);
+    const response = await fetch("/api/generateComparison", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ids: [product1SelectedId, product2SelectedId] }),
+    });
+    if (!response.ok) {
+      throw new Error(response.statusText);
     }
-  };
-
-  const handleProduct2Select = (product) => {
-    if (product === product2name) {
-      setProduct2name(null);
-    } else {
-      setProduct2name(product);
+    // This data is a ReadableStream
+    const data = response.body;
+    if (!data) {
+      return;
     }
+    const reader = data.getReader();
+    const decoder = new TextDecoder();
+    let done = false;
+
+    while (!done) {
+      const { value, done: doneReading } = await reader.read();
+      done = doneReading;
+      const chunkValue = decoder.decode(value);
+      setComparisonResult((prev) => prev + chunkValue);
+    }
+    setIsComparisonRunning(false);
   };
 
   return (
@@ -164,7 +203,7 @@ export function HomePage() {
         <p className="mb-8 max-w-2xl text-center text-lg">
           {`Compare any two products using real reviews and ratings from users. Just enter the names of the products below and click "Search".`}
         </p>
-        <div className="mb-4 flex w-full max-w-3xl flex-col align-middle md:flex-row md:items-center">
+        <div className="mb-4 flex w-full max-w-4xl flex-col align-middle md:flex-row md:items-center">
           <SearchInput
             value={product1name}
             placeholder="Product 1"
@@ -182,41 +221,52 @@ export function HomePage() {
           />
         </div>
         {loading && <LoadingBar />}
-        <div className="my-4 w-full max-w-3xl">
-          {product1name && (
-            <SearchResult
-              productName={product1name}
-              handleProductSelect={handleProduct1Select}
-            />
-          )}
-          {product2name && (
-            <SearchResult
-              productName={product2name}
-              handleProductSelect={handleProduct2Select}
-            />
-          )}
-          {product1name && product2name && (
+        <div className="my-4 w-full max-w-4xl">
+          <div className="flex flex-row">
+            {!!product1Res.length && (
+              <div className="flex w-1/2 flex-col">
+                <h2 className="mb-3 text-center text-2xl">Choose product 1</h2>
+                {product1Res.map((product) => (
+                  <SearchResult
+                    isSelected={product.product_id === product1SelectedId}
+                    product={product}
+                    key={product.product_id}
+                    handleProductSelect={setProduct1SelectedId}
+                  />
+                ))}
+              </div>
+            )}
+            {!!product2Res.length && (
+              <div className="flex w-1/2 flex-col">
+                <h2 className="mb-3 text-center text-2xl">Choose product 2</h2>
+                {product2Res.map((product) => (
+                  <SearchResult
+                    isSelected={product.product_id === product2SelectedId}
+                    product={product}
+                    key={product.product_id}
+                    handleProductSelect={setProduct2SelectedId}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="my-5 grid place-items-center">
             <button
-              className="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
-              disabled={loading}
-              onClick={handleRunComparisonClick}
+              className="rounded-xl bg-violet-500 px-8 py-4 text-white hover:bg-violet-700 disabled:bg-gray-500"
+              disabled={loading || !product1SelectedId || !product2SelectedId}
+              onClick={() => {
+                handleRunComparisonClick().catch(console.error);
+              }}
             >
-              {loading ? (
-                <div className="flex items-center">
-                  <div className="mr-2">Progress Bar</div>
-                  Running Comparison...
-                </div>
-              ) : (
-                "Run Detailed Comparison"
-              )}
+              Run Detailed Comparison
             </button>
-          )}
-          {comparisonResult && (
-            <div className="mt-8">
-              <h2 className="mb-2 text-2xl font-bold">Comparison Result:</h2>
-              <p className="max-w-xl text-lg">{comparisonResult}</p>
-            </div>
-          )}
+            {isComparisonLoading && <LoadingBar />}
+          </div>
+
+          <div className="mt-8">
+            <h2 className="mb-2 text-2xl font-bold">Comparison Result:</h2>
+            <p className="whitespace-pre-wrap text-lg">{comparisonResult}</p>
+          </div>
         </div>
       </div>
     </div>

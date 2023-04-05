@@ -27,11 +27,7 @@ export const createProductFromSearchDataAndReviews = (
     slug: createSlugFromTitle(product.product_title),
     rating: product.product_rating,
     description: product.product_description,
-    reviews: reviews.map((review) => ({
-      id: review.review_id,
-      comment: review.review_text,
-      rating: review.rating,
-    })),
+    reviews: reviews.map((review) => review.review_text),
   };
 };
 

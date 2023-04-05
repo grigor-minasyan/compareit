@@ -4,16 +4,13 @@ import type { Product, ProductSearchData } from "~/types";
 export const generatePromptFromProducts = (products: Product[]) => {
   // const initialPrompt = `I will give you two products with their descriptions and reviews. Write a blog style post comparing the products. Start with an introduction, then give between 10 and 15 pros and cons unordered list of each product. Write the unordered list with hyphens. At the end of the post also write a conclusion about which product you think is better and why.
   // `;
-  const initialPrompt = `I will give you two products with their descriptions and reviews. Based on the description and reviews, write between 10 and 15 pros and cons unordered list of each product. Write the unordered list with hyphens. Clearly mark the product and list with "Pros:" or "Cons:". Do not write any additional introduction or conclusion.
-  `;
+  const initialPrompt = `I will give you two products with their descriptions and reviews. Based on the description and reviews, write between 10 and 15 pros and cons unordered list of each product. Write the unordered list with hyphens. Clearly mark the product with "Product 1: [Product name]" and list with "Pros:" or "Cons:". Write a concluding paragraph about which product you think is better and explain why. After the conclusion also write "Winner is: [Product name]".`;
 
   const productPrompts = products.map((product, i) => {
     return `
 Product ${i + 1}: ${product.title}
 Description of product ${i + 1}: ${product.description}
-Reviews of product ${i + 1}: ${product.reviews
-      .map((review) => review.comment)
-      .join("\n")}`;
+Reviews of product ${i + 1}: ${product.reviews.join("\n")}`;
   });
 
   return initialPrompt + productPrompts.join("\n");
