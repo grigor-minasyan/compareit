@@ -6,10 +6,7 @@ import {
   runFilteredReviewSearch,
 } from "~/server/productApi";
 
-import {
-  createProductFromSearchDataAndReviews,
-  shortenProductDescIfNeeded,
-} from "~/utils/productUtils";
+import { createProductFromSearchDataAndReviews } from "~/utils/productUtils";
 import { generatePromptFromProducts } from "~/utils/promptUtils";
 
 type Param = {
@@ -51,8 +48,8 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
   }
   const prodSearchResult = await runFilteredProductSearch("test");
 
-  const prod1 = prodSearchResult.find((p) => p.product_id === prodId1);
-  const prod2 = prodSearchResult.find((p) => p.product_id === prodId2);
+  const prod1 = prodSearchResult.find((p) => p.asin === prodId1);
+  const prod2 = prodSearchResult.find((p) => p.asin === prodId2);
   if (!prod1 || !prod2) {
     return {
       notFound: true,
@@ -64,8 +61,6 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
     runFilteredReviewSearch(prodId1),
     runFilteredReviewSearch(prodId2),
   ]);
-
-  await Promise.all([prod1, prod2].map(shortenProductDescIfNeeded));
 
   const prod1Clean = createProductFromSearchDataAndReviews(
     prod1,
@@ -95,6 +90,6 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
 export const getStaticPaths: GetStaticPaths = () => {
   return {
     paths: [],
-    fallback: true,
+    fallback: "blocking",
   };
 };
