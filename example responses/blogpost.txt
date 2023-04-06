@@ -1,4 +1,4 @@
-export const finalBlog = `When it comes to clogged drains, finding the right product can be a hassle. With so many options on the market, it can be difficult to determine which product will work best for your particular clog. In this blog post, we will compare and contrast two popular clog removers: Drano Dual Force Foamer Clog Remover and Liquid Plumr Foaming Pipe Snake Clog Remover.
+When it comes to clogged drains, finding the right product can be a hassle. With so many options on the market, it can be difficult to determine which product will work best for your particular clog. In this blog post, we will compare and contrast two popular clog removers: Drano Dual Force Foamer Clog Remover and Liquid Plumr Foaming Pipe Snake Clog Remover.
 
 Drano Dual Force Foamer Clog Remover:
 Pros:
@@ -59,9 +59,9 @@ Cons:
 - No guarantee or it's free information.
 
 Conclusion:
-When deciding between Drano Dual Force Foamer Clog Remover and Liquid Plumr Foaming Pipe Snake Clog Remover, it really comes down to personal preference and the type of clog you're dealing with. Drano seems to be more effective on hair clogs, and has a guarantee that Liquid Plumr does not. However, Liquid Plumr is great for preventing clogs and is more effective for standard debris built up from body oils and soap. Overall, Liquid Plumr is the better value, as it's less expensive for a similar amount of product, and works on a wider range of clogs. While both products have their pros and cons, Liquid Plumr Foaming Pipe Snake Clog Remover is the clear winner due to its greater versatility and effectiveness.`;
+When deciding between Drano Dual Force Foamer Clog Remover and Liquid Plumr Foaming Pipe Snake Clog Remover, it really comes down to personal preference and the type of clog you're dealing with. Drano seems to be more effective on hair clogs, and has a guarantee that Liquid Plumr does not. However, Liquid Plumr is great for preventing clogs and is more effective for standard debris built up from body oils and soap. Overall, Liquid Plumr is the better value, as it's less expensive for a similar amount of product, and works on a wider range of clogs. While both products have their pros and cons, Liquid Plumr Foaming Pipe Snake Clog Remover is the clear winner due to its greater versatility and effectiveness.
 
-export const finalBlog2 = `Product 1:
+Product 1:
 Pros:
 - Effective in clearing clogs in sinks and tubs
 - Deep-cleaning foam reaches places ordinary liquids can't
@@ -136,4 +136,4 @@ Cons:
 - May not be effective on all types of debris
 - Could have stronger foaming action
 - Bottle could be larger for price
-- Can be ineffective on extremely stubborn clogs`;
+- Can be ineffective on extremely stubborn clogs

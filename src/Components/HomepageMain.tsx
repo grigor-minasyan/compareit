@@ -83,7 +83,7 @@ const SearchResult = ({
     <div className="flex flex-row items-center">
       <div className="w-1/5 flex-shrink-0 p-2">
         <img
-          src={product.product_photos[0]}
+          src={product.product_photo}
           alt=""
           className="aspect-square h-full w-full rounded-xl border border-violet-900 bg-gray-500 bg-transparent object-contain object-center"
         />
@@ -95,8 +95,10 @@ const SearchResult = ({
         <div className="flex flex-row items-center">
           <StarIcon width={20} className="mr-1 text-violet-900" />
           <p>
-            <span className="mb-0 mr-1 text-sm">{product.product_rating}</span>
-            <span className="text-xs text-slate-400">{`(${product.product_num_reviews})`}</span>
+            <span className="mb-0 mr-1 text-sm">
+              {product.product_star_rating}
+            </span>
+            <span className="text-xs text-slate-400">{`(${product.product_num_ratings})`}</span>
           </p>
         </div>
       </div>
@@ -119,7 +121,7 @@ const SearchResult = ({
             className={
               "rounded bg-violet-500 px-4 py-2 text-white hover:bg-violet-700"
             }
-            onClick={() => handleProductSelect(product.product_id)}
+            onClick={() => handleProductSelect(product.asin)}
           >
             Select
           </button>
@@ -229,9 +231,9 @@ export function HomePage() {
                 <h2 className="mb-3 text-center text-2xl">Choose product 1</h2>
                 {product1Res.map((product) => (
                   <SearchResult
-                    isSelected={product.product_id === product1SelectedId}
+                    isSelected={product.asin === product1SelectedId}
                     product={product}
-                    key={product.product_id}
+                    key={product.asin}
                     handleProductSelect={setProduct1SelectedId}
                   />
                 ))}
@@ -242,9 +244,9 @@ export function HomePage() {
                 <h2 className="mb-3 text-center text-2xl">Choose product 2</h2>
                 {product2Res.map((product) => (
                   <SearchResult
-                    isSelected={product.product_id === product2SelectedId}
+                    isSelected={product.asin === product2SelectedId}
                     product={product}
-                    key={product.product_id}
+                    key={product.asin}
                     handleProductSelect={setProduct2SelectedId}
                   />
                 ))}

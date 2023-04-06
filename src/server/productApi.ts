@@ -1,8 +1,9 @@
 import { productSearchResults } from "~/constants/productSearch";
 import { reviews } from "~/constants/productReviews";
 import {
-  ZProductApiResponse,
+  ZProductSearchApiResponse,
   ZProductSearchData,
+  ZReviewSearchApiResponse,
   ZReviewSearchData,
 } from "~/utils/zodValidations";
 import type { ProductSearchData, ReviewSearchData } from "~/types";
@@ -13,9 +14,13 @@ export const runFilteredProductSearch = async (
   _query: string
 ): Promise<ProductSearchData[]> => {
   await new Promise((r) => setTimeout(r, 100));
-  const cleanRes = await ZProductApiResponse.parseAsync(productSearchResults);
+  const cleanRes = await ZProductSearchApiResponse.parseAsync(
+    productSearchResults
+  );
   const productParseRes = await Promise.all(
-    cleanRes.data.map((product) => ZProductSearchData.safeParseAsync(product))
+    cleanRes.data.products.map((product) =>
+      ZProductSearchData.safeParseAsync(product)
+    )
   );
 
   const finalRes = [];
@@ -34,21 +39,25 @@ export const runFilteredReviewSearch = async (
     throw new Error("No reviews found for product");
   }
 
-  const cleanRes = await ZProductApiResponse.parseAsync(reviews[id]);
+  const cleanRes = await ZReviewSearchApiResponse.parseAsync(reviews[id]);
   const reviewParseRes = await Promise.all(
-    cleanRes.data.map((review) => ZReviewSearchData.safeParseAsync(review))
+    cleanRes.data.reviews.map((review) =>
+      ZReviewSearchData.safeParseAsync(review)
+    )
   );
   const parsedReviews = [];
   for (const res of reviewParseRes) {
     res.success && parsedReviews.push(res.data);
   }
   // sort finalRes by review_text length, from shortest to longest
-  parsedReviews.sort((a, b) => a.review_text.length - b.review_text.length);
+  parsedReviews.sort(
+    (a, b) => a.review_comment.length - b.review_comment.length
+  );
 
   let totalTokens = 0;
   const limitedReviews = parsedReviews.reduce(
     (acc: ReviewSearchData[], review) => {
-      const tokens = calculateStringTokens(review.review_text);
+      const tokens = calculateStringTokens(review.review_comment);
       if (totalTokens + tokens <= TOKEN_LIMITS.REVIEWS_TOTAL) {
         acc.push(review);
         totalTokens += tokens;
