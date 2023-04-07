@@ -60,18 +60,20 @@ const SearchButton = ({
   disabled?: boolean;
 }) => {
   return (
-    <button
-      type="submit"
-      className={`my-2 w-full rounded-xl px-8 py-2.5 text-white md:w-80 lg:my-0 ${
-        disabled
-          ? "cursor-not-allowed bg-gray-300"
-          : "bg-violet-500 hover:bg-violet-700"
-      }`}
-      onClick={onClick}
-      disabled={loading}
-    >
-      {loading ? "Searching..." : "Search"}
-    </button>
+    <div className="w-full pt-2 md:px-2 md:pt-0">
+      <button
+        type="submit"
+        className={`w-full rounded-xl px-8 py-2.5 text-white md:w-80 ${
+          disabled
+            ? "cursor-not-allowed bg-gray-300"
+            : "bg-violet-500 hover:bg-violet-700"
+        }`}
+        onClick={onClick}
+        disabled={loading}
+      >
+        {loading ? "Searching..." : "Search"}
+      </button>
+    </div>
   );
 };
 
@@ -93,7 +95,7 @@ const SearchResult = ({
           // height={100}
           src={product.product_photo}
           alt={product.product_title}
-          className="aspect-square h-full w-full rounded-xl bg-transparent object-cover object-center drop-shadow-lg"
+          className="aspect-square h-full w-full rounded-xl bg-transparent object-cover object-center mix-blend-multiply"
         />
         {/* <img
           src={product.product_photo}
@@ -102,8 +104,9 @@ const SearchResult = ({
         /> */}
       </div>
       <div className="flex w-3/5 flex-col pl-2">
-        <h2 className="text-md mb-1 truncate font-bold">
-          {product.product_title}
+        <h2 className="mb-1  text-sm font-bold">
+          {product.product_title.substring(0, 55) +
+            (product.product_title.length > 55 ? "..." : "")}
         </h2>
         <div className="flex flex-row items-center">
           <StarIcon width={20} className="mr-1 text-violet-900" />
@@ -222,7 +225,7 @@ export function HomePage() {
         </p>
         <form
           onSubmit={handleSearchFormSubmit}
-          className="mb-4 flex w-full max-w-4xl flex-col align-middle md:flex-row md:items-center"
+          className="mb-4 flex w-full max-w-4xl flex-col px-2 align-middle md:flex-row md:items-center md:px-0"
         >
           <SearchInput
             value={prod1name}
@@ -244,33 +247,37 @@ export function HomePage() {
         <div className="my-4 w-full max-w-4xl">
           <div className="flex flex-col lg:flex-row">
             {!!product1Res.length && (
-              <div className="m-2 flex max-h-screen flex-col overflow-scroll rounded-xl bg-slate-50 p-2 drop-shadow-2xl lg:w-1/2">
+              <div className="m-2 flex max-h-screen flex-col rounded-xl bg-slate-50 p-2 drop-shadow-2xl lg:w-1/2">
                 <h2 className="mb-3 mt-4 text-center text-2xl">
                   Choose product 1
                 </h2>
-                {product1Res.map((product) => (
-                  <SearchResult
-                    isSelected={product.asin === product1SelectedId}
-                    product={product}
-                    key={product.asin}
-                    handleProductSelect={setProduct1SelectedId}
-                  />
-                ))}
+                <div className="overflow-scroll">
+                  {product1Res.map((product) => (
+                    <SearchResult
+                      isSelected={product.asin === product1SelectedId}
+                      product={product}
+                      key={product.asin}
+                      handleProductSelect={setProduct1SelectedId}
+                    />
+                  ))}
+                </div>
               </div>
             )}
             {!!product2Res.length && (
-              <div className="m-2 flex max-h-screen flex-col overflow-scroll rounded-xl bg-slate-50 p-2 drop-shadow-2xl lg:w-1/2">
+              <div className="m-2 flex max-h-screen flex-col rounded-xl bg-slate-50 p-2 drop-shadow-2xl lg:w-1/2">
                 <h2 className="mb-3 mt-4 text-center text-2xl">
                   Choose product 2
                 </h2>
-                {product2Res.map((product) => (
-                  <SearchResult
-                    isSelected={product.asin === product2SelectedId}
-                    product={product}
-                    key={product.asin}
-                    handleProductSelect={setProduct2SelectedId}
-                  />
-                ))}
+                <div className="overflow-scroll">
+                  {product2Res.map((product) => (
+                    <SearchResult
+                      isSelected={product.asin === product2SelectedId}
+                      product={product}
+                      key={product.asin}
+                      handleProductSelect={setProduct2SelectedId}
+                    />
+                  ))}
+                </div>
               </div>
             )}
           </div>
