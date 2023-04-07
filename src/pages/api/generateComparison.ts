@@ -3,7 +3,7 @@ import { AmazonApiReviews } from "~/server/productApi";
 import { createProductFromSearchDataAndReviews } from "~/utils/productUtils";
 import { AMAZON_STORE_ID } from "~/constants";
 import { generatePromptFromProducts } from "~/utils/promptUtils";
-import { CACHE_KEY_PREFIX, redisRestGet } from "~/server/redis";
+import { CACHE_KEY, redisRestGet } from "~/server/redis";
 import type { ProductSearchData } from "~/types";
 
 if (!process.env.OPENAI_API_KEY) {
@@ -20,8 +20,8 @@ const handler = async (req: Request): Promise<Response> => {
   const [prodId1, prodId2] = ids;
 
   const [prod1, prod2] = await Promise.all([
-    redisRestGet<ProductSearchData>(CACHE_KEY_PREFIX.AMZ_API_PRODUCT + prodId1),
-    redisRestGet<ProductSearchData>(CACHE_KEY_PREFIX.AMZ_API_PRODUCT + prodId2),
+    redisRestGet<ProductSearchData>(CACHE_KEY.AMZ_API_PRODUCT(prodId1)),
+    redisRestGet<ProductSearchData>(CACHE_KEY.AMZ_API_PRODUCT(prodId2)),
   ]);
 
   if (!prod1 || !prod2) {

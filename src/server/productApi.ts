@@ -5,16 +5,24 @@ import {
   ZReviewSearchData,
 } from "~/utils/zodValidations";
 import type { ProductSearchData, ReviewSearchData } from "~/types";
-import { TOKEN_LIMITS } from "~/constants";
-import { calculateStringTokens } from "~/utils/promptUtils";
 import { env } from "~/env.mjs";
 import { backOff } from "exponential-backoff";
+import { CACHE_KEY, redisRestGet, redisRestSetInPipeline } from "./redis";
+import { redisRestSet } from "./redis";
 
 const AMAZON_API_BASE_URL = "https://real-time-amazon-data.p.rapidapi.com";
 
-export const AmazonApiSearch = (
+export const AmazonApiSearch = async (
   query: string
 ): Promise<ProductSearchData[]> => {
+  const cached = await redisRestGet<ProductSearchData[]>(
+    CACHE_KEY.AMZ_API_PRODUCT_QUERY(query)
+  );
+  if (cached) {
+    console.log("AmazonApiSearch: returning cached results for query:", query);
+    return cached;
+  }
+
   const url =
     `${AMAZON_API_BASE_URL}/search?` +
     new URLSearchParams({
@@ -45,11 +53,26 @@ export const AmazonApiSearch = (
         )
       );
 
-      const finalRes = [];
+      const finalRes: ProductSearchData[] = [];
+      const seenAsins = new Set<string>();
       for (const res of productParseRes) {
-        res.success && finalRes.push(res.data);
+        if (res.success && !seenAsins.has(res.data.asin)) {
+          finalRes.push(res.data);
+          seenAsins.add(res.data.asin);
+        }
       }
-      // TODO filter sometimes duplicate results
+
+      await redisRestSetInPipeline([
+        [CACHE_KEY.AMZ_API_PRODUCT_QUERY(query), finalRes],
+        ...finalRes.map(
+          (product) =>
+            [CACHE_KEY.AMZ_API_PRODUCT(product.asin), product] as [
+              string,
+              unknown
+            ]
+        ),
+      ]);
+
       return finalRes;
     },
     {
@@ -66,8 +89,22 @@ export const AmazonApiSearch = (
 };
 
 export const AmazonApiReviews = async (
-  asin: string
+  asin: string,
+  page = 1
 ): Promise<ReviewSearchData[]> => {
+  const cached = await redisRestGet<ReviewSearchData[]>(
+    CACHE_KEY.AMZ_API_PRODUCT_REVIEWS(asin, page)
+  );
+  if (cached) {
+    console.log(
+      "AmazonApiReviews: returning cached results for asin:",
+      asin,
+      "page:",
+      page
+    );
+    return cached;
+  }
+
   const url =
     `${AMAZON_API_BASE_URL}/product-reviews?` +
     new URLSearchParams({
@@ -77,8 +114,8 @@ export const AmazonApiReviews = async (
       star_rating: "ALL",
       verified_purchases_only: "false",
       images_or_videos_only: "false",
-      page: "1",
-      page_size: "100",
+      page: `${page}`,
+      page_size: "20",
     }).toString();
 
   const options = {
@@ -99,14 +136,18 @@ export const AmazonApiReviews = async (
           ZReviewSearchData.safeParseAsync(review)
         )
       );
+      const seenReviewIds = new Set<string>();
       const parsedReviews = [];
       for (const res of reviewParseRes) {
-        res.success && parsedReviews.push(res.data);
+        if (res.success && !seenReviewIds.has(res.data.review_id)) {
+          parsedReviews.push(res.data);
+          seenReviewIds.add(res.data.review_id);
+        }
       }
       // sort finalRes by review_text length, from shortest to longest
-      parsedReviews.sort(
-        (a, b) => a.review_comment.length - b.review_comment.length
-      );
+      // parsedReviews.sort(
+      //   (a, b) => a.review_comment.length - b.review_comment.length
+      // );
 
       // let totalTokens = 0;
       // const limitedReviews = parsedReviews.reduce(
@@ -126,6 +167,11 @@ export const AmazonApiReviews = async (
 
       // return limitedReviews;
       // TODO filter sometimes duplicate results
+
+      await redisRestSet(
+        CACHE_KEY.AMZ_API_PRODUCT_REVIEWS(asin, page),
+        parsedReviews
+      );
       return parsedReviews;
     },
     {

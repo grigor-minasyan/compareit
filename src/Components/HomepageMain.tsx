@@ -51,11 +51,9 @@ const SearchInput = ({
 };
 
 const SearchButton = ({
-  onClick,
   loading,
   disabled,
 }: {
-  onClick: () => void;
   loading: boolean;
   disabled?: boolean;
 }) => {
@@ -68,7 +66,6 @@ const SearchButton = ({
             ? "cursor-not-allowed bg-gray-300"
             : "bg-violet-500 hover:bg-violet-700"
         }`}
-        onClick={onClick}
         disabled={loading}
       >
         {loading ? "Searching..." : "Search"}
@@ -110,12 +107,10 @@ const SearchResult = ({
         </h2>
         <div className="flex flex-row items-center">
           <StarIcon width={20} className="mr-1 text-violet-900" />
-          <p>
-            <span className="mb-0 mr-1 text-sm">
-              {product.product_star_rating}
-            </span>
-            <span className="text-xs text-slate-400">{`(${product.product_num_ratings})`}</span>
-          </p>
+          <span className="mb-0 mr-1 text-sm">
+            {product.product_star_rating}
+          </span>
+          <span className="text-xs text-slate-400">{`(${product.product_num_ratings})`}</span>
         </div>
       </div>
       <div className="flex w-1/5 flex-row justify-around">
@@ -237,11 +232,7 @@ export function HomePage() {
             placeholder="Product 2"
             onChange={(e) => setProd2name(e.target.value)}
           />
-          <SearchButton
-            onClick={() => searchMut.mutate({ prod1name, prod2name })}
-            loading={loading}
-            disabled={isSearchDisabled}
-          />
+          <SearchButton loading={loading} disabled={isSearchDisabled} />
         </form>
         {loading && <LoadingBar />}
         <div className="my-4 w-full max-w-4xl">

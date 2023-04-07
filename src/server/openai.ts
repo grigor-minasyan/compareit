@@ -9,7 +9,6 @@ const openai = new OpenAIApi(configuration);
 
 export const runPrompt = async (prompt: string) => {
   console.log("Starting prompt");
-  console.time("prompt");
   const completion = await backOff(
     () =>
       openai.createChatCompletion({
@@ -24,7 +23,6 @@ export const runPrompt = async (prompt: string) => {
       },
     }
   );
-  console.timeEnd("prompt");
   console.log("Successfully ran a prompt with usage of", completion.data.usage);
   if (!completion.data.choices[0]?.message?.content) {
     throw new Error("No completion found");
