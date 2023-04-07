@@ -1,7 +1,12 @@
-import { type ChangeEventHandler, useState } from "react";
+import {
+  useState,
+  type ChangeEventHandler,
+  type FormEventHandler,
+} from "react";
 import { StarIcon } from "@heroicons/react/24/solid";
 import { api } from "~/utils/api";
 import type { ProductSearchData } from "~/types";
+import Image from "next/image";
 
 const SearchInput = ({
   placeholder,
@@ -18,12 +23,11 @@ const SearchInput = ({
         Search
       </label>
       <div className="relative my-1">
-        <span className="absolute inset-y-0 left-0 flex items-center pl-2">
-          <button
-            type="button"
-            title="search"
-            className="p-1 focus:outline-none focus:ring"
-          >
+        <span
+          className="absolute inset-y-0 left-0 flex items-center pl-2"
+          tabIndex={-1}
+        >
+          <button type="button" title="search" className="p-1" tabIndex={-1}>
             <svg
               fill="currentColor"
               viewBox="0 0 512 512"
@@ -57,6 +61,7 @@ const SearchButton = ({
 }) => {
   return (
     <button
+      type="submit"
       className={`my-2 w-full rounded-xl px-8 py-2.5 text-white md:w-80 lg:my-0 ${
         disabled
           ? "cursor-not-allowed bg-gray-300"
@@ -80,16 +85,24 @@ const SearchResult = ({
   handleProductSelect: (s: string) => void;
 }) => {
   return (
-    <div className="flex flex-row items-center">
-      <div className="w-1/5 flex-shrink-0 p-2">
-        <img
+    <div className="m-2 flex flex-row items-center rounded-xl bg-gradient-to-bl from-slate-50 to-violet-50 p-2 drop-shadow-xl">
+      <div className="relative h-20 w-1/5 flex-shrink-0 p-2">
+        <Image
+          fill
+          // width={100}
+          // height={100}
+          src={product.product_photo}
+          alt={product.product_title}
+          className="aspect-square h-full w-full rounded-xl bg-transparent object-cover object-center drop-shadow-lg"
+        />
+        {/* <img
           src={product.product_photo}
           alt=""
-          className="aspect-square h-full w-full rounded-xl border border-violet-900 bg-gray-500 bg-transparent object-contain object-center"
-        />
+          className="aspect-square h-full w-full rounded-xl bg-transparent object-contain object-center drop-shadow-lg"
+        /> */}
       </div>
-      <div className="flex w-3/5 flex-col">
-        <h2 className="mb-1 truncate text-lg font-bold">
+      <div className="flex w-3/5 flex-col pl-2">
+        <h2 className="text-md mb-1 truncate font-bold">
           {product.product_title}
         </h2>
         <div className="flex flex-row items-center">
@@ -164,7 +177,8 @@ export function HomePage() {
   });
   const loading = searchMut.isLoading;
 
-  const handleSearchClick = () => {
+  const handleSearchFormSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
     searchMut.mutate({ prod1name, prod2name });
   };
 
@@ -206,7 +220,10 @@ export function HomePage() {
         <p className="mb-8 max-w-2xl text-center text-lg">
           {`Compare any two products using real reviews and ratings from users. Just enter the names of the products below and click "Search".`}
         </p>
-        <div className="mb-4 flex w-full max-w-4xl flex-col align-middle md:flex-row md:items-center">
+        <form
+          onSubmit={handleSearchFormSubmit}
+          className="mb-4 flex w-full max-w-4xl flex-col align-middle md:flex-row md:items-center"
+        >
           <SearchInput
             value={prod1name}
             placeholder="Product 1"
@@ -218,17 +235,19 @@ export function HomePage() {
             onChange={(e) => setProd2name(e.target.value)}
           />
           <SearchButton
-            onClick={handleSearchClick}
+            onClick={() => searchMut.mutate({ prod1name, prod2name })}
             loading={loading}
             disabled={isSearchDisabled}
           />
-        </div>
+        </form>
         {loading && <LoadingBar />}
         <div className="my-4 w-full max-w-4xl">
-          <div className="flex flex-row">
+          <div className="flex flex-col lg:flex-row">
             {!!product1Res.length && (
-              <div className="flex w-1/2 flex-col">
-                <h2 className="mb-3 text-center text-2xl">Choose product 1</h2>
+              <div className="m-2 flex max-h-screen flex-col overflow-scroll rounded-xl bg-slate-50 p-2 drop-shadow-2xl lg:w-1/2">
+                <h2 className="mb-3 mt-4 text-center text-2xl">
+                  Choose product 1
+                </h2>
                 {product1Res.map((product) => (
                   <SearchResult
                     isSelected={product.asin === product1SelectedId}
@@ -240,8 +259,10 @@ export function HomePage() {
               </div>
             )}
             {!!product2Res.length && (
-              <div className="flex w-1/2 flex-col">
-                <h2 className="mb-3 text-center text-2xl">Choose product 2</h2>
+              <div className="m-2 flex max-h-screen flex-col overflow-scroll rounded-xl bg-slate-50 p-2 drop-shadow-2xl lg:w-1/2">
+                <h2 className="mb-3 mt-4 text-center text-2xl">
+                  Choose product 2
+                </h2>
                 {product2Res.map((product) => (
                   <SearchResult
                     isSelected={product.asin === product2SelectedId}
