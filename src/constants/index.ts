@@ -12,6 +12,6 @@ export const TOKEN_LIMITS = {
 export const CHAR_PER_TOKEN_RATIO = 4; // lower is more conservative, openAI gives as 4 on average
 
 export const MIN_REVIEW_COUNT = 10;
-export const MIN_REVIEW_LENGTH = 10;
+export const MIN_REVIEW_LENGTH = 20;
 
 export const AMAZON_STORE_ID = "g113872638";

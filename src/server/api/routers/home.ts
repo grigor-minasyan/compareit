@@ -2,7 +2,6 @@ import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { AmazonApiSearch } from "~/server/productApi";
-import { CACHE_KEY_PREFIX, redisRestSet } from "~/server/redis";
 
 export const homeRouter = createTRPCRouter({
   hello: publicProcedure
@@ -19,16 +18,16 @@ export const homeRouter = createTRPCRouter({
     .input(z.object({ prod1name: z.string(), prod2name: z.string() }))
     .mutation(async ({ input }) => {
       const { prod1name, prod2name } = input;
-      const [prod1SearchResult, prod2SearchResult] = await Promise.all([
-        AmazonApiSearch(prod1name),
-        AmazonApiSearch(prod2name),
-      ]);
-      await Promise.all(
-        [...prod1SearchResult, ...prod2SearchResult].map((p) =>
-          redisRestSet(CACHE_KEY_PREFIX.AMZ_API_PRODUCT + p.asin, p)
-        )
-      );
-      // const products = await ctx.utils.searchProducts(query, storeId);
-      return [prod1SearchResult, prod2SearchResult];
+      if (prod1name === prod2name) {
+        const prod1SearchResult = await AmazonApiSearch(prod1name);
+        return [prod1SearchResult, prod1SearchResult];
+      } else {
+        const [prod1SearchResult, prod2SearchResult] = await Promise.all([
+          AmazonApiSearch(prod1name),
+          AmazonApiSearch(prod2name),
+        ]);
+        // const products = await ctx.utils.searchProducts(query, storeId);
+        return [prod1SearchResult, prod2SearchResult];
+      }
     }),
 });
