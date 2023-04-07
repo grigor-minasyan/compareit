@@ -1,7 +1,8 @@
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { runFilteredProductSearch } from "~/server/productApi";
+import { AmazonApiSearch } from "~/server/productApi";
+import { CACHE_KEY_PREFIX, redisSet } from "~/server/redis";
 
 export const homeRouter = createTRPCRouter({
   hello: publicProcedure
@@ -15,13 +16,19 @@ export const homeRouter = createTRPCRouter({
     return ctx.prisma.example.findMany();
   }),
   searchProducts: publicProcedure
-    .input(z.string().min(1).array().length(2))
-    .mutation(async ({ ctx, input }) => {
-      const [prod1, prod2] = input;
-      // TODO use the input IDs
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      const prodSearchResult = await runFilteredProductSearch("test");
+    .input(z.object({ prod1name: z.string(), prod2name: z.string() }))
+    .mutation(async ({ input }) => {
+      const { prod1name, prod2name } = input;
+      const [prod1SearchResult, prod2SearchResult] = await Promise.all([
+        AmazonApiSearch(prod1name),
+        AmazonApiSearch(prod2name),
+      ]);
+      await Promise.all(
+        [...prod1SearchResult, ...prod2SearchResult].map((p) =>
+          redisSet(CACHE_KEY_PREFIX.AMZ_API_PRODUCT + p.asin, p)
+        )
+      );
       // const products = await ctx.utils.searchProducts(query, storeId);
-      return [prodSearchResult, prodSearchResult];
+      return [prod1SearchResult, prod2SearchResult];
     }),
 });

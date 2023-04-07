@@ -1,9 +1,10 @@
-import { runFilteredReviewSearch } from "~/server/productApi";
 import { OpenAIStream } from "../../utils/OpenAIStream";
-import { runFilteredProductSearch } from "~/server/productApi";
+import { AmazonApiReviews } from "~/server/productApi";
 import { createProductFromSearchDataAndReviews } from "~/utils/productUtils";
 import { AMAZON_STORE_ID } from "~/constants";
 import { generatePromptFromProducts } from "~/utils/promptUtils";
+import { CACHE_KEY_PREFIX, redisGet } from "~/server/redis";
+import type { ProductSearchData } from "~/types";
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error("Missing env var from OpenAI");
@@ -12,25 +13,24 @@ if (!process.env.OPENAI_API_KEY) {
 export const config = { runtime: "edge" };
 
 const handler = async (req: Request): Promise<Response> => {
-  const { ids } = (await req.json()) as { ids?: string[] };
+  const { ids } = (await req.json()) as unknown as { ids?: string[] };
   if (!ids || !ids[0] || !ids[1]) {
     return new Response("No ids in the request", { status: 400 });
   }
-  console.log(ids);
-  // TODO use the input IDs
-  const [prodId1, prodId2] = ["B07SQPZ8YP", "B0BWLHGVC9"];
+  const [prodId1, prodId2] = ids;
 
-  const prodSearchResult = await runFilteredProductSearch("test");
+  const [prod1, prod2] = await Promise.all([
+    redisGet<ProductSearchData>(CACHE_KEY_PREFIX.AMZ_API_PRODUCT + prodId1),
+    redisGet<ProductSearchData>(CACHE_KEY_PREFIX.AMZ_API_PRODUCT + prodId2),
+  ]);
 
-  const prod1 = prodSearchResult.find((p) => p.asin === prodId1);
-  const prod2 = prodSearchResult.find((p) => p.asin === prodId2);
   if (!prod1 || !prod2) {
     return new Response("No products found", { status: 400 });
   }
 
   const [reviews1, reviews2] = await Promise.all([
-    runFilteredReviewSearch(prodId1),
-    runFilteredReviewSearch(prodId2),
+    AmazonApiReviews(prodId1),
+    AmazonApiReviews(prodId2),
   ]);
 
   const prod1Clean = createProductFromSearchDataAndReviews(

@@ -144,8 +144,8 @@ const LoadingBar = () => {
 };
 
 export function HomePage() {
-  const [product1name, setProduct1name] = useState("");
-  const [product2name, setProduct2name] = useState("");
+  const [prod1name, setProd1name] = useState("");
+  const [prod2name, setProd2name] = useState("");
 
   const [product1Res, setProduct1Res] = useState<ProductSearchData[]>([]);
   const [product2Res, setProduct2Res] = useState<ProductSearchData[]>([]);
@@ -155,7 +155,7 @@ export function HomePage() {
 
   const [comparisonResult, setComparisonResult] = useState("");
   const [isComparisonLoading, setIsComparisonRunning] = useState(false);
-  const isSearchDisabled = !product1name || !product2name;
+  const isSearchDisabled = !prod1name || !prod2name;
   const searchMut = api.home.searchProducts.useMutation({
     onSuccess(data) {
       data[0] && setProduct1Res(data[0]);
@@ -165,7 +165,7 @@ export function HomePage() {
   const loading = searchMut.isLoading;
 
   const handleSearchClick = () => {
-    searchMut.mutate([product1name, product2name]);
+    searchMut.mutate({ prod1name, prod2name });
   };
 
   const handleRunComparisonClick = async () => {
@@ -208,14 +208,14 @@ export function HomePage() {
         </p>
         <div className="mb-4 flex w-full max-w-4xl flex-col align-middle md:flex-row md:items-center">
           <SearchInput
-            value={product1name}
+            value={prod1name}
             placeholder="Product 1"
-            onChange={(e) => setProduct1name(e.target.value)}
+            onChange={(e) => setProd1name(e.target.value)}
           />
           <SearchInput
-            value={product2name}
+            value={prod2name}
             placeholder="Product 2"
-            onChange={(e) => setProduct2name(e.target.value)}
+            onChange={(e) => setProd2name(e.target.value)}
           />
           <SearchButton
             onClick={handleSearchClick}
