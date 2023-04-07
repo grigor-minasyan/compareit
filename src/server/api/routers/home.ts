@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { AmazonApiSearch } from "~/server/productApi";
-import { CACHE_KEY_PREFIX, redisSet } from "~/server/redis";
+import { CACHE_KEY_PREFIX, redisRestSet } from "~/server/redis";
 
 export const homeRouter = createTRPCRouter({
   hello: publicProcedure
@@ -25,7 +25,7 @@ export const homeRouter = createTRPCRouter({
       ]);
       await Promise.all(
         [...prod1SearchResult, ...prod2SearchResult].map((p) =>
-          redisSet(CACHE_KEY_PREFIX.AMZ_API_PRODUCT + p.asin, p)
+          redisRestSet(CACHE_KEY_PREFIX.AMZ_API_PRODUCT + p.asin, p)
         )
       );
       // const products = await ctx.utils.searchProducts(query, storeId);

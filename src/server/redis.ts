@@ -11,10 +11,13 @@ export const CACHE_KEY_PREFIX = {
   AMZ_API_PRODUCT: "AMZ_API_PRODUCT:",
 } as const;
 
-export const redisGet = async <T>(key: string) => {
+export const redisRestGet = async <T>(key: string) => {
   return (await redis.get(key)) as T;
 };
 
-export const redisSet = async <T extends JSONObject>(key: string, value: T) => {
+export const redisRestSet = async <T extends JSONObject>(
+  key: string,
+  value: T
+) => {
   await redis.set(key, value, { ex: 3600 });
 };
