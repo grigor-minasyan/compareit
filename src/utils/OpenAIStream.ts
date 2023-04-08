@@ -3,22 +3,10 @@ import {
   type ParsedEvent,
   type ReconnectInterval,
 } from "eventsource-parser";
+import { backOff } from "exponential-backoff";
 import { env } from "~/env.mjs";
 
-export async function OpenAIStream(payload: {
-  model: string;
-  messages: {
-    role: "user" | "system";
-    content: string;
-  }[];
-  temperature: number;
-  top_p: number;
-  frequency_penalty: number;
-  presence_penalty: number;
-  stream: boolean;
-  n: number;
-  max_tokens?: number;
-}) {
+export async function OpenAIStream(prompt: string) {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
 
@@ -29,7 +17,16 @@ export async function OpenAIStream(payload: {
       Authorization: `Bearer ${env.OPENAI_API_KEY}`,
     },
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.6,
+      top_p: 1,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+      stream: true,
+      n: 1,
+    }),
   });
 
   const stream = new ReadableStream<Uint8Array>({
@@ -75,4 +72,45 @@ export async function OpenAIStream(payload: {
   });
 
   return stream;
+}
+
+export async function OpenAIDirect(prompt: string) {
+  const res = await backOff(
+    () =>
+      fetch("https://api.openai.com/v1/chat/completions", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${env.OPENAI_API_KEY}`,
+        },
+        method: "POST",
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.6,
+          top_p: 1,
+          frequency_penalty: 0,
+          presence_penalty: 0,
+          n: 1,
+        }),
+      }),
+    {
+      jitter: "full",
+      retry(e, attemptNumber) {
+        console.error(
+          `OpenAIDirect: Attempt #${attemptNumber} failed. Error:`,
+          e
+        );
+        return true;
+      },
+    }
+  );
+
+  const json = (await res.json()) as unknown as {
+    choices: { message: { content: string } }[];
+  };
+  const text = json.choices[0]?.message.content || "";
+  if (!text) {
+    throw new Error("No text returned from OpenAI");
+  }
+  return text;
 }

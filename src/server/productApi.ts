@@ -144,29 +144,6 @@ export const AmazonApiReviews = async (
           seenReviewIds.add(res.data.review_id);
         }
       }
-      // sort finalRes by review_text length, from shortest to longest
-      // parsedReviews.sort(
-      //   (a, b) => a.review_comment.length - b.review_comment.length
-      // );
-
-      // let totalTokens = 0;
-      // const limitedReviews = parsedReviews.reduce(
-      //   (acc: ReviewSearchData[], review) => {
-      //     const tokens = calculateStringTokens(review.review_comment);
-      //     if (totalTokens + tokens <= TOKEN_LIMITS.REVIEWS_TOTAL) {
-      //       acc.push(review);
-      //       totalTokens += tokens;
-      //     }
-      //     return acc;
-      //   },
-      //   []
-      // );
-      // console.log(
-      //   `Limited the number of reviews for productId: ${asin} from ${parsedReviews.length} to ${limitedReviews.length}`
-      // );
-
-      // return limitedReviews;
-      // TODO filter sometimes duplicate results
 
       await redisRestSet(
         CACHE_KEY.AMZ_API_PRODUCT_REVIEWS(asin, page),

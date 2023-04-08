@@ -16,6 +16,13 @@ Reviews of product ${i + 1}: ${product.reviews.join("\n")}`;
   return initialPrompt + productPrompts.join("\n");
 };
 
+export const generatePromptToShortenReview = (
+  review: string
+) => `Give me a summary of this review within 3 sentences. Here is the review.
+
+${review}
+`;
+
 export const calculateStringTokens = (str: string) => {
   return Math.round(str.length / CHAR_PER_TOKEN_RATIO); // 3.8 is optimistic, usually it's slightly more than 4
 };

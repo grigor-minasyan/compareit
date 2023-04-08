@@ -1,6 +1,11 @@
 import { OpenAIStream } from "../../utils/OpenAIStream";
 import { AmazonApiReviews } from "~/server/productApi";
-import { createProductFromSearchDataAndReviews } from "~/utils/productUtils";
+import {
+  createProductFromSearchDataAndReviews,
+  limitReviewsCount,
+  reviewsSortFromShortestToLongest,
+  shortenReviewIfNeeded,
+} from "~/utils/productUtils";
 import { AMAZON_STORE_ID } from "~/constants";
 import { generatePromptFromProducts } from "~/utils/promptUtils";
 import { CACHE_KEY, redisRestGet } from "~/server/redis";
@@ -28,38 +33,41 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response("No products found", { status: 400 });
   }
 
-  const [reviews1, reviews2] = await Promise.all([
-    AmazonApiReviews(prodId1),
-    AmazonApiReviews(prodId2),
-  ]);
+  const [reviews1pg1, reviews2pg1, reviews1pg2, reviews2pg2] =
+    await Promise.all([
+      AmazonApiReviews(prodId1),
+      AmazonApiReviews(prodId2),
+      AmazonApiReviews(prodId1, 2),
+      AmazonApiReviews(prodId2, 2),
+    ]);
+
+  const reviews1 = [...reviews1pg1, ...reviews1pg2];
+  const reviews2 = [...reviews2pg1, ...reviews2pg2];
+
+  // TODO calculate how much token is used for this and store it in the db for later analytics
+  await Promise.all([...reviews1, ...reviews2].map(shortenReviewIfNeeded));
+
+  // sort finalRes by review_text length, from shortest to longest
+  reviews1.sort(reviewsSortFromShortestToLongest);
+  reviews2.sort(reviewsSortFromShortestToLongest);
+
+  const reviews1Limited = limitReviewsCount(reviews1);
+  const reviews2Limited = limitReviewsCount(reviews2);
 
   const prod1Clean = createProductFromSearchDataAndReviews(
     prod1,
-    reviews1,
+    reviews1Limited,
     AMAZON_STORE_ID
   );
   const prod2Clean = createProductFromSearchDataAndReviews(
     prod2,
-    reviews2,
+    reviews2Limited,
     AMAZON_STORE_ID
   );
 
   const prompt = generatePromptFromProducts([prod1Clean, prod2Clean]);
 
-  const [stream, stream2] = (
-    await OpenAIStream({
-      model: "gpt-3.5-turbo",
-      // messages: [{ role: "user", content: "tell me a joke "}],
-      messages: [{ role: "user", content: prompt }], // TODO put the actual prompt here
-      temperature: 0.6,
-      top_p: 1,
-      frequency_penalty: 0,
-      presence_penalty: 0,
-      stream: true,
-      n: 1,
-      // max_tokens: 10, // TODO remove the max tokens
-    })
-  ).tee();
+  const [stream, stream2] = (await OpenAIStream(prompt)).tee();
   // Create a new reader for the stream
   const reader = stream2.getReader();
 

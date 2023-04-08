@@ -1,4 +1,5 @@
 import { Redis } from "@upstash/redis";
+import { TIMEOUTS_SEC } from "~/constants";
 import { env } from "~/env.mjs";
 
 const redis = new Redis({
@@ -18,7 +19,7 @@ export const redisRestGet = async <T>(key: string) => {
 };
 
 export const redisRestSet = (key: string, value: unknown) => {
-  return redis.set(key, value, { ex: 3600 });
+  return redis.set(key, value, { ex: TIMEOUTS_SEC.REDIS });
 };
 
 export const redisRestSetInPipeline = (
@@ -26,7 +27,7 @@ export const redisRestSetInPipeline = (
 ) => {
   const p = redis.pipeline();
   for (const [key, value] of valuesAsKeyValPairs) {
-    p.set(key, value, { ex: 3600 });
+    p.set(key, value, { ex: TIMEOUTS_SEC.REDIS });
   }
   return p.exec();
 };
