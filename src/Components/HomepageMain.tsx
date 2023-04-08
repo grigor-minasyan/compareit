@@ -87,18 +87,13 @@ const SearchResult = ({
     <div className="m-2 flex flex-row items-center rounded-xl bg-gradient-to-bl from-slate-50 to-violet-50 p-2 drop-shadow-xl">
       <div className="relative h-20 w-1/5 flex-shrink-0 p-2">
         <Image
-          fill
-          // width={100}
-          // height={100}
+          width={100}
+          height={100}
+          priority={true}
           src={product.product_photo}
           alt={product.product_title}
-          className="aspect-square h-full w-full rounded-xl bg-transparent object-cover object-center mix-blend-multiply"
+          className="aspect-square h-full w-full rounded-xl bg-transparent object-cover object-center"
         />
-        {/* <img
-          src={product.product_photo}
-          alt=""
-          className="aspect-square h-full w-full rounded-xl bg-transparent object-contain object-center drop-shadow-lg"
-        /> */}
       </div>
       <div className="flex w-3/5 flex-col pl-2">
         <h2 className="mb-1  text-sm font-bold">
@@ -144,11 +139,36 @@ const SearchResult = ({
 
 const LoadingBar = () => {
   return (
-    <div className="mb-4 w-full">
+    <div className="my-2 w-full">
       <div className="flex animate-pulse">
         <div className="flex-1">
           <div className="h-3 rounded bg-purple-600"></div>
         </div>
+      </div>
+    </div>
+  );
+};
+
+const SearchResultsWrapper = (props: {
+  productRes: ProductSearchData[];
+  selectedProdId: string;
+  setProdSelectedId: (s: string) => void;
+  colHeader: string;
+}) => {
+  return (
+    <div className="m-2 flex flex-col rounded-xl bg-slate-50 p-2 drop-shadow-2xl lg:w-1/2">
+      <div className="sticky top-0 z-10 -mx-2 backdrop-blur-lg">
+        <h2 className="mb-3 mt-4 text-center text-2xl">{props.colHeader}</h2>
+      </div>
+      <div>
+        {props.productRes.map((product) => (
+          <SearchResult
+            isSelected={product.asin === props.selectedProdId}
+            product={product}
+            key={product.asin}
+            handleProductSelect={props.setProdSelectedId}
+          />
+        ))}
       </div>
     </div>
   );
@@ -238,38 +258,20 @@ export function HomePage() {
         <div className="my-4 w-full max-w-4xl">
           <div className="flex flex-col lg:flex-row">
             {!!product1Res.length && (
-              <div className="m-2 flex max-h-screen flex-col rounded-xl bg-slate-50 p-2 drop-shadow-2xl lg:w-1/2">
-                <h2 className="mb-3 mt-4 text-center text-2xl">
-                  Choose product 1
-                </h2>
-                <div className="overflow-scroll">
-                  {product1Res.map((product) => (
-                    <SearchResult
-                      isSelected={product.asin === product1SelectedId}
-                      product={product}
-                      key={product.asin}
-                      handleProductSelect={setProduct1SelectedId}
-                    />
-                  ))}
-                </div>
-              </div>
+              <SearchResultsWrapper
+                productRes={product1Res}
+                selectedProdId={product1SelectedId}
+                setProdSelectedId={setProduct1SelectedId}
+                colHeader="Choose product 1"
+              />
             )}
             {!!product2Res.length && (
-              <div className="m-2 flex max-h-screen flex-col rounded-xl bg-slate-50 p-2 drop-shadow-2xl lg:w-1/2">
-                <h2 className="mb-3 mt-4 text-center text-2xl">
-                  Choose product 2
-                </h2>
-                <div className="overflow-scroll">
-                  {product2Res.map((product) => (
-                    <SearchResult
-                      isSelected={product.asin === product2SelectedId}
-                      product={product}
-                      key={product.asin}
-                      handleProductSelect={setProduct2SelectedId}
-                    />
-                  ))}
-                </div>
-              </div>
+              <SearchResultsWrapper
+                productRes={product2Res}
+                selectedProdId={product2SelectedId}
+                setProdSelectedId={setProduct2SelectedId}
+                colHeader="Choose product 2"
+              />
             )}
           </div>
           <div className="my-5 grid place-items-center">

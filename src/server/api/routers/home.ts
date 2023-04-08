@@ -17,7 +17,9 @@ export const homeRouter = createTRPCRouter({
   searchProducts: publicProcedure
     .input(z.object({ prod1name: z.string(), prod2name: z.string() }))
     .mutation(async ({ input }) => {
-      const { prod1name, prod2name } = input;
+      let { prod1name, prod2name } = input;
+      prod1name = prod1name.toLowerCase().trim();
+      prod2name = prod2name.toLowerCase().trim();
       if (prod1name === prod2name) {
         const prod1SearchResult = await AmazonApiSearch(prod1name);
         return [prod1SearchResult, prod1SearchResult];
