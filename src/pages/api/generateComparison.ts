@@ -10,14 +10,27 @@ import { AMAZON_STORE_ID } from "~/constants";
 import { generatePromptFromProducts } from "~/utils/promptUtils";
 import { CACHE_KEY, redisRestGet } from "~/server/redis";
 import type { ProductSearchData } from "~/types";
-
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error("Missing env var from OpenAI");
-}
+// import { testStreamArr } from "~/constants/streaming";
 
 export const config = { runtime: "edge" };
 
 const handler = async (req: Request): Promise<Response> => {
+  // // creating a readable stream response from test array
+  // const streamTest = new ReadableStream({
+  //   async start(controller) {
+  //     const encoder = new TextEncoder();
+  //     for (const str of testStreamArr) {
+  //       const data = encoder.encode(str);
+  //       controller.enqueue(data);
+  //       await new Promise((resolve) => setTimeout(resolve, 15));
+  //     }
+  //     controller.close();
+  //   },
+  // });
+
+  // // returning the stream response
+  // return new Response(streamTest);
+
   const { ids } = (await req.json()) as unknown as { ids?: string[] };
   if (!ids || !ids[0] || !ids[1]) {
     return new Response("No ids in the request", { status: 400 });
@@ -45,7 +58,8 @@ const handler = async (req: Request): Promise<Response> => {
   const reviews2 = [...reviews2pg1, ...reviews2pg2];
 
   // TODO calculate how much token is used for this and store it in the db for later analytics
-  await Promise.all([...reviews1, ...reviews2].map(shortenReviewIfNeeded));
+  // TODO figure this out since it's very expensive
+  // await Promise.all([...reviews1, ...reviews2].map(shortenReviewIfNeeded));
 
   // sort finalRes by review_text length, from shortest to longest
   reviews1.sort(reviewsSortFromShortestToLongest);
@@ -75,16 +89,18 @@ const handler = async (req: Request): Promise<Response> => {
   (async () => {
     const decoder = new TextDecoder();
     let finalVal = "";
+    const chunksArr = [];
     while (true) {
       const { done, value } = await reader.read();
       const chunkValue = decoder.decode(value);
-      // console.log(chunkValue);
       finalVal += chunkValue;
+      chunksArr.push(chunkValue);
       if (done) {
         break;
       }
     }
-    console.log(finalVal);
+    // console.log(finalVal);
+    // console.log(JSON.stringify(chunksArr));
   })().catch((e) => console.error(e));
 
   return new Response(stream);

@@ -2,11 +2,12 @@ import { CHAR_PER_TOKEN_RATIO } from "~/constants";
 import type { Product } from "~/types";
 
 export const generatePromptFromProducts = (products: Product[]) => {
-  const initialPrompt = `I will give you two products with their titles and reviews, you will write a SEO friendly blog style post with an introduction about what the article is about.
-Then based on the product reviews, write between 10 and 15 pros and cons list of each product in third person.
-Write a concluding paragraph about which product you think is the winning product and explain why it is the winner.
+  //   const initialPrompt = `I will give you two products with their titles and reviews, you will write a SEO friendly blog style post with an introduction about what the article is about.
+  // Then based on the product reviews, write between 10 and 15 pros and cons list of each product in third person.
+  // Write a concluding paragraph about which product you think is the winning product and explain why it is the winner.
 
-Write everything structured as a valid JSON with keys "introduction", "product1Pros", "product1Cons, "product2Pros", "product2Cons", "conclusion", "winningProductName" and values as strings. Write the pros and const list as an array of strings. Only output the resulting JSON and nothing else.`;
+  // Write everything structured as a valid JSON with keys "introduction", "product1Pros", "product1Cons, "product2Pros", "product2Cons", "conclusion", "winningProductName" and values as strings. Write the pros and const list as an array of strings. Only output the resulting JSON and nothing else.`;
+  const initialPrompt = `I will give you two products with their descriptions and reviews. Based on the description and reviews, write between 10 and 15 pros and cons unordered list of each product. Start with a blog style introduction of what we are going to do. Then write the unordered list with hyphens. Clearly mark the product with "Product 1: [Product name]" and list with "Pros:" or "Cons:". Write a concluding paragraph about which product you think is better and explain why.`;
   const productPrompts = products.map((product, i) => {
     return `
 Product ${i + 1}: ${product.title}
