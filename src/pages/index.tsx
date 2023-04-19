@@ -1,6 +1,6 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import { HomePage } from "~/Components/HomepageMain";
+import { HomePage } from "~/Components/Homepage";
 // import Link from "next/link";
 
 // import { api } from "~/utils/api";
