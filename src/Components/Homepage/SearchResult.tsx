@@ -16,7 +16,7 @@ export const SearchResult = ({
   const isSelected = selectedProdId === product.asin;
   const handleSelect = useHomeStore((state) => state.setSelectedProductId);
   return (
-    <div className="m-2 flex flex-row items-center rounded-xl bg-gradient-to-bl from-slate-50 to-violet-50 p-2 drop-shadow-xl">
+    <div className="m-2 flex flex-row items-center rounded-xl bg-violet-50 p-2 drop-shadow-xl">
       <div className="relative h-20 w-1/5 flex-shrink-0 p-2">
         <Image
           width={100}

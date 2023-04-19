@@ -102,7 +102,6 @@ export function HomePage() {
             disabled={isSearchDisabled}
           />
         </form>
-        {searchMut.isLoading && <LoadingBar />}
         <div className="my-4 w-full max-w-4xl">
           <div className="flex flex-col lg:flex-row">
             {/* //clean up this or use it <SearchResultDropdown /> */}
@@ -118,7 +117,10 @@ export function HomePage() {
                 !selectedProductId[2]
               }
               onClick={() => {
-                handleRunComparisonClick().catch(console.error);
+                handleRunComparisonClick().catch((e) => {
+                  console.error(e);
+                  setIsComparisonRunning(false);
+                });
               }}
             >
               Run Detailed Comparison

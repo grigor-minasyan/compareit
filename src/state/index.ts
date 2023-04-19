@@ -11,6 +11,9 @@ interface HomeState {
   selectedProductId: {
     [key in ProductNum]: string;
   };
+  searchResultCollapsed: {
+    [key in ProductNum]: boolean;
+  };
   comparisonResult: string;
   setProductName: (num: ProductNum, name: string) => void;
   setProductSearchResult: (
@@ -18,6 +21,7 @@ interface HomeState {
     result: ProductSearchData[]
   ) => void;
   setSelectedProductId: (num: ProductNum, productId: string) => void;
+  toggleSearchResultCollapsed: (num: ProductNum) => void;
   setComparisonResult: (result: string) => void;
 }
 
@@ -33,6 +37,10 @@ export const useHomeStore = create<HomeState>((set) => ({
   selectedProductId: {
     "1": "",
     "2": "",
+  },
+  searchResultCollapsed: {
+    "1": false,
+    "2": false,
   },
   comparisonResult: "",
   setProductName: (num, name) =>
@@ -54,6 +62,13 @@ export const useHomeStore = create<HomeState>((set) => ({
       selectedProductId: {
         ...state.selectedProductId,
         [num]: productId,
+      },
+    })),
+  toggleSearchResultCollapsed: (num) =>
+    set((state) => ({
+      searchResultCollapsed: {
+        ...state.searchResultCollapsed,
+        [num]: !state.searchResultCollapsed[num],
       },
     })),
   setComparisonResult: (result) => set(() => ({ comparisonResult: result })),

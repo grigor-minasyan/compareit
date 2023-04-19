@@ -1,23 +1,49 @@
 import { useHomeStore } from "~/state";
 import type { ProductNum } from "~/types";
 import { SearchResult } from "./SearchResult";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
-export const SearchResultsWrapper = (props: { productNum: ProductNum }) => {
+export const SearchResultsWrapper = ({
+  productNum,
+}: {
+  productNum: ProductNum;
+}) => {
   const productSearchResult = useHomeStore(
-    (state) => state.productSearchResult[props.productNum]
+    (state) => state.productSearchResult[productNum]
+  );
+  const isCollapsed = useHomeStore(
+    (state) => state.searchResultCollapsed[productNum]
+  );
+  const toggleCollapsed = useHomeStore(
+    (state) => state.toggleSearchResultCollapsed
   );
 
   return !productSearchResult.length ? null : (
-    <div className="m-2 flex flex-col rounded-xl bg-slate-50 p-2 drop-shadow-2xl lg:w-1/2">
-      <div className="sticky top-0 z-10 -mx-2 backdrop-blur-lg">
-        <h2 className="mb-3 mt-4 text-center text-2xl">{`Choose product ${props.productNum}`}</h2>
+    <div className="m-2 shrink rounded-xl bg-slate-50 p-2 drop-shadow-2xl lg:w-1/2">
+      <div className="sticky top-0 z-10 -mx-2 flex items-center justify-center gap-3 backdrop-blur-lg">
+        <h2 className="mb-3 mt-3 text-center text-2xl text-violet-900">{`Choose product ${productNum}`}</h2>
+        <button
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-900"
+          onClick={() => toggleCollapsed(productNum)}
+        >
+          <ChevronDownIcon
+            width={24}
+            className={`pt-0.5 text-white transition-all duration-500 ${
+              isCollapsed ? "" : "-rotate-180"
+            }`}
+          />
+        </button>
       </div>
-      <div>
+      <div
+        className={`${
+          isCollapsed ? "h-0" : "h-full"
+        } overflow-hidden transition-all duration-500`}
+      >
         {productSearchResult.map((product) => (
           <SearchResult
             product={product}
             key={product.asin}
-            productNum={props.productNum}
+            productNum={productNum}
           />
         ))}
       </div>
