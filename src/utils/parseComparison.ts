@@ -23,13 +23,16 @@ const extractList = (regex: RegExp, text: string): string[] => {
 };
 
 export const parseComparison = (text: string) => {
-  const introRegex = /Introduction:\n\n([\s\S]*?)\n\nProduct/;
-  const product1ProsRegex = /Product 1:[\s\S]*?Pros:\n-([\s\S]*?)\n\nCons:/;
-  const product1ConsRegex = /Product 1:[\s\S]*?Cons:\n-([\s\S]*?)\n\nProduct 2/;
-  const product2ProsRegex = /Product 2:[\s\S]*?Pros:\n-([\s\S]*?)\n\nCons:/;
+  const introRegex = /Introduction:\n([\s\S]*?)(?=\n\nProduct|$)/;
+  const product1ProsRegex =
+    /Product 1:[\s\S]*?Pros:\n-([\s\S]*?)(?=\n\nCons|$)/;
+  const product1ConsRegex =
+    /Product 1:[\s\S]*?Cons:\n-([\s\S]*?)(?=\n\nProduct 2|$)/;
+  const product2ProsRegex =
+    /Product 2:[\s\S]*?Pros:\n-([\s\S]*?)(?=\n\nCons|$)/;
   const product2ConsRegex =
-    /Product 2:[\s\S]*?Cons:\n-([\s\S]*?)\n\nConclusion/;
-  const conclusionRegex = /Conclusion:\n\n([\s\S]*?)$/;
+    /Product 2:[\s\S]*?Cons:\n-([\s\S]*?)(?=\n\nConclusion|$)/;
+  const conclusionRegex = /Conclusion:\n([\s\S]*?)(?=$|$)/;
 
   const intro: string = extractText(introRegex, text);
   const product1Pros: string[] = extractList(product1ProsRegex, text);
