@@ -1,4 +1,11 @@
 {
   "cSpell.enabled": true,
-  "cSpell.words": ["Asins", "backoff", "openai", "rapidapi", "UPSTASH"]
+  "cSpell.words": [
+    "Asins",
+    "backoff",
+    "Compareit",
+    "openai",
+    "rapidapi",
+    "UPSTASH"
+  ]
 }

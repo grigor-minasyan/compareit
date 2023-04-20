@@ -19,7 +19,11 @@ export const SearchResultsWrapper = ({
   );
 
   return !productSearchResult.length ? null : (
-    <div className="m-2 shrink rounded-xl bg-slate-50 p-2 drop-shadow-2xl lg:w-1/2">
+    <div
+      className={`m-2 rounded-xl bg-slate-50 p-2 drop-shadow-2xl lg:w-1/2 ${
+        isCollapsed ? "h-70" : ""
+      }`}
+    >
       <div className="sticky top-0 z-10 -mx-2 flex items-center justify-center gap-3 backdrop-blur-lg">
         <h2 className="mb-3 mt-3 text-center text-2xl text-violet-900">{`Choose product ${productNum}`}</h2>
         <button
@@ -28,17 +32,13 @@ export const SearchResultsWrapper = ({
         >
           <ChevronDownIcon
             width={24}
-            className={`pt-0.5 text-white transition-all duration-500 ${
+            className={`pt-0.5 text-white transition-transform duration-500 ${
               isCollapsed ? "" : "-rotate-180"
             }`}
           />
         </button>
       </div>
-      <div
-        className={`${
-          isCollapsed ? "h-0" : "h-full"
-        } overflow-hidden transition-all duration-500`}
-      >
+      <div className={`${isCollapsed ? "h-0" : "h-full"} overflow-hidden`}>
         {productSearchResult.map((product) => (
           <SearchResult
             product={product}

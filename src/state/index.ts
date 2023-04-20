@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 import type { ProductNum, ProductSearchData } from "~/types";
 
 interface HomeState {
@@ -25,51 +26,53 @@ interface HomeState {
   setComparisonResult: (result: string) => void;
 }
 
-export const useHomeStore = create<HomeState>((set) => ({
-  productName: {
-    "1": "",
-    "2": "",
-  },
-  productSearchResult: {
-    "1": [],
-    "2": [],
-  },
-  selectedProductId: {
-    "1": "",
-    "2": "",
-  },
-  searchResultCollapsed: {
-    "1": false,
-    "2": false,
-  },
-  comparisonResult: "",
-  setProductName: (num, name) =>
-    set((state) => ({
-      productName: {
-        ...state.productName,
-        [num]: name,
-      },
-    })),
-  setProductSearchResult: (num, result) =>
-    set((state) => ({
-      productSearchResult: {
-        ...state.productSearchResult,
-        [num]: result,
-      },
-    })),
-  setSelectedProductId: (num, productId) =>
-    set((state) => ({
-      selectedProductId: {
-        ...state.selectedProductId,
-        [num]: productId,
-      },
-    })),
-  toggleSearchResultCollapsed: (num) =>
-    set((state) => ({
-      searchResultCollapsed: {
-        ...state.searchResultCollapsed,
-        [num]: !state.searchResultCollapsed[num],
-      },
-    })),
-  setComparisonResult: (result) => set(() => ({ comparisonResult: result })),
-}));
+export const useHomeStore = create<HomeState>()(
+  devtools((set) => ({
+    productName: {
+      "1": "",
+      "2": "",
+    },
+    productSearchResult: {
+      "1": [],
+      "2": [],
+    },
+    selectedProductId: {
+      "1": "",
+      "2": "",
+    },
+    searchResultCollapsed: {
+      "1": false,
+      "2": false,
+    },
+    comparisonResult: "",
+    setProductName: (num, name) =>
+      set((state) => ({
+        productName: {
+          ...state.productName,
+          [num]: name,
+        },
+      })),
+    setProductSearchResult: (num, result) =>
+      set((state) => ({
+        productSearchResult: {
+          ...state.productSearchResult,
+          [num]: result,
+        },
+      })),
+    setSelectedProductId: (num, productId) =>
+      set((state) => ({
+        selectedProductId: {
+          ...state.selectedProductId,
+          [num]: productId,
+        },
+      })),
+    toggleSearchResultCollapsed: (num) =>
+      set((state) => ({
+        searchResultCollapsed: {
+          ...state.searchResultCollapsed,
+          [num]: !state.searchResultCollapsed[num],
+        },
+      })),
+    setComparisonResult: (result) => set(() => ({ comparisonResult: result })),
+  }))
+);

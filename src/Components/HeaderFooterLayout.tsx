@@ -1,11 +1,11 @@
 import { type ReactNode } from "react";
 import Footer from "./Footer";
-import Header from "./Header";
+// import Header from "./Header";
 
 export default function Layout({ children }: { children?: ReactNode }) {
   return (
     <>
-      <Header />
+      {/* <Header /> */}
       <main className="m-0 bg-gradient-to-br from-slate-100 to-violet-100">
         {children}
       </main>

@@ -1,4 +1,4 @@
-export const WebsiteName = "EZ Compare";
+export const WebsiteName = "Compareit.ai";
 
 export const revalidationTimersInSec = {
   jointComparison: 60 * 60 * 24, // 24 hours

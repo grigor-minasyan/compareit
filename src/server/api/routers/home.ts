@@ -22,14 +22,14 @@ export const homeRouter = createTRPCRouter({
       prod2name = prod2name.toLowerCase().trim();
       if (prod1name === prod2name) {
         const prod1SearchResult = await AmazonApiSearch(prod1name);
-        return [prod1SearchResult, prod1SearchResult];
+        return { "1": prod1SearchResult, "2": prod1SearchResult };
       } else {
         const [prod1SearchResult, prod2SearchResult] = await Promise.all([
           AmazonApiSearch(prod1name),
           AmazonApiSearch(prod2name),
         ]);
         // const products = await ctx.utils.searchProducts(query, storeId);
-        return [prod1SearchResult, prod2SearchResult];
+        return { "1": prod1SearchResult, "2": prod2SearchResult };
       }
     }),
 });

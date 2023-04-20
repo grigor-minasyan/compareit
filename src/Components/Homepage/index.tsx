@@ -4,6 +4,9 @@ import { useHomeStore } from "~/state";
 import { SearchInput } from "./SearchInput";
 import { SearchButton } from "./SearchButton";
 import { SearchResultsWrapper } from "./SearchResultsWrapper";
+import { TopCurves } from "./TopCurves";
+import { WebsiteName } from "~/constants";
+import { parseComparison } from "~/utils/parseComparison";
 
 const LoadingBar = () => {
   return (
@@ -33,8 +36,8 @@ export function HomePage() {
   const isSearchDisabled = !prod1name || !prod2name;
   const searchMut = api.home.searchProducts.useMutation({
     onSuccess(data) {
-      data[0] && setProductSearchResult("1", data[0]);
-      data[1] && setProductSearchResult("2", data[1]);
+      setProductSearchResult("1", data[1]);
+      setProductSearchResult("2", data[2]);
     },
   });
 
@@ -75,13 +78,22 @@ export function HomePage() {
     }
     setIsComparisonRunning(false);
   };
-
+  // console.log(JSON.stringify(parseComparison(comparisonResult), null, 2));
   return (
-    <div className="container mx-auto">
-      <div className="flex flex-col items-center py-8">
-        <h1 className="mb-4 text-4xl font-bold">AI Product Compare</h1>
+    <div className="mx-0 w-screen">
+      <TopCurves />
+      <div className="container mx-auto flex flex-col items-center py-8">
+        <h1 className="mb-4 text-5xl font-bold uppercase">
+          {WebsiteName.substring(0, WebsiteName.length - 2)}
+          <span className="text-violet-900">
+            {WebsiteName.substring(WebsiteName.length - 2)}
+          </span>
+        </h1>
         <p className="mb-8 max-w-2xl text-center text-lg">
-          {`Compare any two products using real reviews and ratings from users. Just enter the names of the products below and click "Search".`}
+          {`This tool helps you compare products based on their reviews. We pull real time Amazon.com reviews, analyze each product based on hundreds of reviews using AI, then we we provide you with a quick pros and cons list of each product.`}
+        </p>
+        <p className="mb-8 max-w-2xl text-center text-lg">
+          {`Just enter the names of the products below and click "Search". After that, select the products you want to compare and click "Run Detailed Comparison".`}
         </p>
         <form
           onSubmit={handleSearchFormSubmit}
@@ -104,34 +116,36 @@ export function HomePage() {
         </form>
         <div className="my-4 w-full max-w-4xl">
           <div className="flex flex-col lg:flex-row">
-            {/* //clean up this or use it <SearchResultDropdown /> */}
             <SearchResultsWrapper productNum="1" />
             <SearchResultsWrapper productNum="2" />
           </div>
-          <div className="my-5 grid place-items-center">
-            <button
-              className="rounded-xl bg-violet-500 px-8 py-4 text-white hover:bg-violet-700 disabled:bg-gray-500"
-              disabled={
-                searchMut.isLoading ||
-                !selectedProductId[1] ||
-                !selectedProductId[2]
-              }
-              onClick={() => {
-                handleRunComparisonClick().catch((e) => {
-                  console.error(e);
-                  setIsComparisonRunning(false);
-                });
-              }}
-            >
-              Run Detailed Comparison
-            </button>
-            {isComparisonLoading && <LoadingBar />}
-          </div>
-
-          <div className="mt-8">
-            <h2 className="mb-2 text-2xl font-bold">Comparison Result:</h2>
-            <p className="whitespace-pre-wrap text-lg">{comparisonResult}</p>
-          </div>
+          {!!(selectedProductId[1] && selectedProductId[2]) && (
+            <div className="my-5 grid place-items-center">
+              <button
+                className="rounded-xl bg-violet-500 px-8 py-4 text-white hover:bg-violet-700 disabled:bg-gray-500"
+                disabled={
+                  searchMut.isLoading ||
+                  !selectedProductId[1] ||
+                  !selectedProductId[2]
+                }
+                onClick={() => {
+                  handleRunComparisonClick().catch((e) => {
+                    console.error(e);
+                    setIsComparisonRunning(false);
+                  });
+                }}
+              >
+                Run Detailed Comparison
+              </button>
+              {isComparisonLoading && <LoadingBar />}
+            </div>
+          )}
+          {comparisonResult && (
+            <div className="mt-8">
+              <h2 className="mb-2 text-2xl font-bold">Comparison Result:</h2>
+              <p className="whitespace-pre-wrap text-lg">{comparisonResult}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
