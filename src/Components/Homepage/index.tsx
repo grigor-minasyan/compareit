@@ -24,6 +24,7 @@ export function HomePage() {
   const prod1name = useHomeStore((state) => state.productName["1"]);
   const prod2name = useHomeStore((state) => state.productName["2"]);
   const setProductName = useHomeStore((state) => state.setProductName);
+  const addErrorAlert = useHomeStore((state) => state.addErrorAlert);
 
   const setProductSearchResult = useHomeStore(
     (state) => state.setProductSearchResult
@@ -38,6 +39,9 @@ export function HomePage() {
     onSuccess(data) {
       setProductSearchResult("1", data[1]);
       setProductSearchResult("2", data[2]);
+    },
+    onError(error) {
+      addErrorAlert(error.message);
     },
   });
 
@@ -59,7 +63,8 @@ export function HomePage() {
       }),
     });
     if (!response.ok) {
-      throw new Error(response.statusText);
+      const errorText = await response.text();
+      throw new Error(errorText || response.statusText);
     }
     // This data is a ReadableStream
     const data = response.body;
@@ -82,7 +87,7 @@ export function HomePage() {
     <div className="mx-0 w-screen">
       <TopCurves />
       <div className="container mx-auto flex flex-col items-center py-8">
-        <h1 className="mb-4 text-5xl font-bold uppercase">
+        <h1 className="mb-4 text-5xl font-bold">
           {WebsiteName.substring(0, WebsiteName.length - 2)}
           <span className="text-violet-900">
             {WebsiteName.substring(WebsiteName.length - 2)}
@@ -129,7 +134,11 @@ export function HomePage() {
               }
               onClick={() => {
                 handleRunComparisonClick().catch((e) => {
-                  console.error(e);
+                  const errorMessage =
+                    e instanceof Error
+                      ? e.message
+                      : "Something went wrong, please try again in a bit.";
+                  addErrorAlert(errorMessage);
                   setIsComparisonRunning(false);
                 });
               }}

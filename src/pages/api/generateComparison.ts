@@ -6,10 +6,11 @@ import {
   reviewsSortFromShortestToLongest,
   shortenReviewIfNeeded,
 } from "~/utils/productUtils";
-import { AMAZON_STORE_ID } from "~/constants";
+import { AMAZON_STORE_ID, UNKNOWN_IP } from "~/constants";
 import { generatePromptFromProducts } from "~/utils/promptUtils";
-import { CACHE_KEY, redisRestGet } from "~/server/redis";
+import { CACHE_KEY, rateLimit, redisRestGet } from "~/server/redis";
 import type { ProductSearchData } from "~/types";
+import { getClientIp, type Request as RequestForIp } from "request-ip";
 // import { testStreamArr } from "~/constants/streaming";
 
 export const config = { runtime: "edge" };
@@ -30,6 +31,14 @@ const handler = async (req: Request): Promise<Response> => {
 
   // // returning the stream response
   // return new Response(streamTest);
+  const ip = getClientIp(req as unknown as RequestForIp) || UNKNOWN_IP;
+  const { success } = await rateLimit.limit(ip);
+  if (!success || 1) {
+    console.error(`Rate limit exceeded for ${ip}`);
+    return new Response("Too many comparisons, please slow down", {
+      status: 429,
+    });
+  }
 
   const { ids } = (await req.json()) as unknown as { ids?: string[] };
   if (!ids || !ids[0] || !ids[1]) {

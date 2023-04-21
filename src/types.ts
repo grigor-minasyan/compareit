@@ -17,3 +17,8 @@ export type ProductSearchData = z.infer<typeof ZProductSearchData>;
 export type ReviewSearchData = z.infer<typeof ZReviewSearchData>;
 
 export type ProductNum = "1" | "2";
+
+export type ErrorAlert = {
+  id: string;
+  message: string;
+};

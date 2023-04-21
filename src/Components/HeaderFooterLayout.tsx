@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import Footer from "./Footer";
+import ErrorAlerts from "./ErrorAlerts";
 // import Header from "./Header";
 
 export default function Layout({ children }: { children?: ReactNode }) {
@@ -10,6 +11,7 @@ export default function Layout({ children }: { children?: ReactNode }) {
         {children}
       </main>
       <Footer />
+      <ErrorAlerts />
     </>
   );
 }

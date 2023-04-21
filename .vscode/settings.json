@@ -6,6 +6,7 @@
     "Compareit",
     "openai",
     "rapidapi",
+    "Ratelimit",
     "UPSTASH"
   ]
 }

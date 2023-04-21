@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { ProductNum, ProductSearchData } from "~/types";
+import type { ErrorAlert, ProductNum, ProductSearchData } from "~/types";
+import { v4 as uuidv4 } from "uuid";
 
 interface HomeState {
   productName: {
@@ -24,10 +25,14 @@ interface HomeState {
   setSelectedProductId: (num: ProductNum, productId: string) => void;
   toggleSearchResultCollapsed: (num: ProductNum) => void;
   setComparisonResult: (result: string) => void;
+  // Error alerts
+  errorAlerts: ErrorAlert[];
+  addErrorAlert: (message: string) => void;
+  clearErrorAlert: (id: string) => void;
 }
 
 export const useHomeStore = create<HomeState>()(
-  devtools((set) => ({
+  devtools((set, get) => ({
     productName: {
       "1": "",
       "2": "",
@@ -74,5 +79,19 @@ export const useHomeStore = create<HomeState>()(
         },
       })),
     setComparisonResult: (result) => set(() => ({ comparisonResult: result })),
+    errorAlerts: [],
+    addErrorAlert: (message: string) => {
+      const id = uuidv4();
+      const errorAlert = { id, message };
+      set((state) => ({ errorAlerts: [...state.errorAlerts, errorAlert] }));
+
+      setTimeout(() => {
+        get().clearErrorAlert(id);
+      }, 3000);
+    },
+    clearErrorAlert: (id: string) =>
+      set((state) => ({
+        errorAlerts: state.errorAlerts.filter((alert) => alert.id !== id),
+      })),
   }))
 );

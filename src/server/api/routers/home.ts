@@ -1,7 +1,9 @@
 import { z } from "zod";
+import { UNKNOWN_IP } from "~/constants";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { AmazonApiSearch } from "~/server/productApi";
+import { rateLimit } from "~/server/redis";
 
 export const homeRouter = createTRPCRouter({
   hello: publicProcedure
@@ -16,7 +18,14 @@ export const homeRouter = createTRPCRouter({
   }),
   searchProducts: publicProcedure
     .input(z.object({ prod1name: z.string(), prod2name: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const ipToLimit = ctx.reqIp || UNKNOWN_IP;
+      const { success } = await rateLimit.limit(ipToLimit);
+      if (!success) {
+        console.error(`Rate limit exceeded for ${ipToLimit}`);
+        throw new Error("Too many searches, please slow down");
+      }
+
       let { prod1name, prod2name } = input;
       prod1name = prod1name.toLowerCase().trim();
       prod2name = prod2name.toLowerCase().trim();

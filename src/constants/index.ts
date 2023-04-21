@@ -20,3 +20,6 @@ export const AMAZON_STORE_ID = "g113872638";
 export const TIMEOUTS_SEC = {
   REDIS: 60 * 60 * 24, // 24 hours
 } as const;
+
+export const RATE_LIMIT_REQUESTS_PER_10_SEC = 5;
+export const UNKNOWN_IP = "UNKNOWN_IP";
