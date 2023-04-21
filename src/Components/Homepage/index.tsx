@@ -6,7 +6,7 @@ import { SearchButton } from "./SearchButton";
 import { SearchResultsWrapper } from "./SearchResultsWrapper";
 import { TopCurves } from "./TopCurves";
 import { WebsiteName } from "~/constants";
-import { parseComparison } from "~/utils/parseComparison";
+import { ComparisonResults } from "./ComparisonResults";
 
 const LoadingBar = () => {
   return (
@@ -78,7 +78,6 @@ export function HomePage() {
     }
     setIsComparisonRunning(false);
   };
-  // console.log(JSON.stringify(parseComparison(comparisonResult), null, 2));
   return (
     <div className="mx-0 w-screen">
       <TopCurves />
@@ -119,32 +118,35 @@ export function HomePage() {
             <SearchResultsWrapper productNum="1" />
             <SearchResultsWrapper productNum="2" />
           </div>
-          {!!(selectedProductId[1] && selectedProductId[2]) && (
-            <div className="my-5 grid place-items-center">
-              <button
-                className="rounded-xl bg-violet-500 px-8 py-4 text-white hover:bg-violet-700 disabled:bg-gray-500"
-                disabled={
-                  searchMut.isLoading ||
-                  !selectedProductId[1] ||
-                  !selectedProductId[2]
-                }
-                onClick={() => {
-                  handleRunComparisonClick().catch((e) => {
-                    console.error(e);
-                    setIsComparisonRunning(false);
-                  });
-                }}
-              >
-                Run Detailed Comparison
-              </button>
-              {isComparisonLoading && <LoadingBar />}
-            </div>
-          )}
-          {comparisonResult && (
-            <div className="mt-8">
-              <h2 className="mb-2 text-2xl font-bold">Comparison Result:</h2>
-              <p className="whitespace-pre-wrap text-lg">{comparisonResult}</p>
-            </div>
+          <div className="my-5 grid place-items-center">
+            <button
+              className="rounded-xl bg-violet-500 px-8 py-4 text-white hover:bg-violet-700 disabled:bg-gray-500"
+              disabled={
+                isComparisonLoading ||
+                searchMut.isLoading ||
+                !selectedProductId[1] ||
+                !selectedProductId[2]
+              }
+              onClick={() => {
+                handleRunComparisonClick().catch((e) => {
+                  console.error(e);
+                  setIsComparisonRunning(false);
+                });
+              }}
+            >
+              Run Detailed Comparison
+            </button>
+            {!selectedProductId[1] ||
+              (!selectedProductId[2] && (
+                <label className="text-xs text-red-500">
+                  {"Please search and select two products to compare"}
+                </label>
+              ))}
+            {isComparisonLoading && <LoadingBar />}
+          </div>
+
+          {!!comparisonResult && (
+            <ComparisonResults comparisonResult={comparisonResult} />
           )}
         </div>
       </div>

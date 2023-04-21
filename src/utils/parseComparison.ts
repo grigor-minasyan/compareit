@@ -9,7 +9,7 @@ type Result = {
 
 const extractText = (regex: RegExp, text: string): string => {
   const result = regex.exec(text);
-  return result?.[1] ? result[1].trim() : "Generating";
+  return result?.[1] ? result[1].trim() : "Analyzing reviews...";
 };
 
 const extractList = (regex: RegExp, text: string): string[] => {
@@ -19,7 +19,7 @@ const extractList = (regex: RegExp, text: string): string[] => {
         .trim()
         .split("\n- ")
         .filter((x) => x)
-    : ["Generating"];
+    : ["Analyzing reviews..."];
 };
 
 export const parseComparison = (text: string) => {

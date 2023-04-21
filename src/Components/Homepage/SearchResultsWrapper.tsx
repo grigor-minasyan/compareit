@@ -24,7 +24,7 @@ export const SearchResultsWrapper = ({
         isCollapsed ? "h-70" : ""
       }`}
     >
-      <div className="sticky top-0 z-10 -mx-2 flex items-center justify-center gap-3 backdrop-blur-lg">
+      <div className="sticky top-0 z-10 -mx-2 flex items-center justify-center gap-3 backdrop-blur-md">
         <h2 className="mb-3 mt-3 text-center text-2xl text-violet-900">{`Choose product ${productNum}`}</h2>
         <button
           className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-900"

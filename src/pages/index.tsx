@@ -13,8 +13,7 @@ const Home: NextPage = () => {
     <>
       <Head>
         <title>
-          {WebsiteName} - AI powered product comparison based on real customer
-          reviews
+          {`${WebsiteName} - AI powered product comparison based on real customer reviews`}
         </title>
         <meta name="description" content="LOGO DESC" />
         <meta
