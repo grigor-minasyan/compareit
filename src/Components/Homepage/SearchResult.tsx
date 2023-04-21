@@ -2,6 +2,7 @@ import { StarIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { useHomeStore } from "~/state";
 import type { ProductNum, ProductSearchData } from "~/types";
+import { truncateProductTitle } from "~/utils/productUtils";
 
 export const SearchResult = ({
   product,
@@ -29,8 +30,7 @@ export const SearchResult = ({
       </div>
       <div className="flex w-3/5 flex-col pl-1 sm:pl-2">
         <h2 className="mb-1  text-sm font-bold">
-          {product.product_title.substring(0, 100) +
-            (product.product_title.length > 100 ? "..." : "")}
+          {truncateProductTitle(product.product_title)}
         </h2>
         <div className="flex flex-row items-center">
           <StarIcon width={20} className="mr-1 text-violet-900" />

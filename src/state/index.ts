@@ -13,6 +13,9 @@ interface HomeState {
   selectedProductId: {
     [key in ProductNum]: string;
   };
+  selectedProductForComparison: {
+    [key in ProductNum]: ProductSearchData | null;
+  };
   searchResultCollapsed: {
     [key in ProductNum]: boolean;
   };
@@ -23,6 +26,10 @@ interface HomeState {
     result: ProductSearchData[]
   ) => void;
   setSelectedProductId: (num: ProductNum, productId: string) => void;
+  setSelectedProductForComparison: (
+    num: ProductNum,
+    productId: string | null
+  ) => void;
   toggleSearchResultCollapsed: (num: ProductNum) => void;
   setComparisonResult: (result: string) => void;
   // Error alerts
@@ -44,6 +51,10 @@ export const useHomeStore = create<HomeState>()(
     selectedProductId: {
       "1": "",
       "2": "",
+    },
+    selectedProductForComparison: {
+      "1": null,
+      "2": null,
     },
     searchResultCollapsed: {
       "1": false,
@@ -69,6 +80,18 @@ export const useHomeStore = create<HomeState>()(
         selectedProductId: {
           ...state.selectedProductId,
           [num]: productId,
+        },
+      })),
+    setSelectedProductForComparison: (num, productId) =>
+      set((state) => ({
+        selectedProductForComparison: {
+          ...state.selectedProductForComparison,
+          [num]:
+            productId === null
+              ? null
+              : state.productSearchResult[num].find(
+                  (product) => product.asin === productId
+                ) || null,
         },
       })),
     toggleSearchResultCollapsed: (num) =>

@@ -31,6 +31,9 @@ export function HomePage() {
   );
 
   const selectedProductId = useHomeStore((state) => state.selectedProductId);
+  const setSelectedProductForComparison = useHomeStore(
+    (state) => state.setSelectedProductForComparison
+  );
 
   const [comparisonResult, setComparisonResult] = useState("");
   const [isComparisonLoading, setIsComparisonRunning] = useState(false);
@@ -53,6 +56,9 @@ export function HomePage() {
   const handleRunComparisonClick = async () => {
     setIsComparisonRunning(true);
     setComparisonResult("");
+    (["1", "2"] as const).forEach((productNum) =>
+      setSelectedProductForComparison(productNum, selectedProductId[productNum])
+    );
     const response = await fetch("/api/generateComparison", {
       method: "POST",
       headers: {

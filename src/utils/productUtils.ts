@@ -60,3 +60,7 @@ export const reviewsSortFromShortestToLongest = (
   a: ReviewSearchData,
   b: ReviewSearchData
 ) => a.review_comment.length - b.review_comment.length;
+
+export const truncateProductTitle = (title: string) => {
+  return title.length > 30 ? title.slice(0, 100) + "..." : title;
+};
