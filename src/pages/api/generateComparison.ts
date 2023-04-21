@@ -33,8 +33,8 @@ export default async function handler(req: Request): Promise<Response> {
   // return new Response(streamTest);
   const ip = ipAddress(req) || UNKNOWN_IP;
   const { success } = await rateLimit.limit(ip);
-  if (!success || 1) {
-    console.error(`Rate limit exceeded for ${ip}`);
+  if (!success) {
+    console.warn(`Rate limit exceeded for ${ip}`);
     return new Response("Too many comparisons, please slow down", {
       status: 429,
     });
