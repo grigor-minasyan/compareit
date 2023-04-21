@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { UNKNOWN_IP } from "~/constants";
 
@@ -23,7 +24,10 @@ export const homeRouter = createTRPCRouter({
       const { success } = await rateLimit.limit(ipToLimit);
       if (!success) {
         console.error(`Rate limit exceeded for ${ipToLimit}`);
-        throw new Error("Too many searches, please slow down");
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Too many searches, please slow down",
+        });
       }
 
       let { prod1name, prod2name } = input;

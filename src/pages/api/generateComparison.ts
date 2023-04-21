@@ -4,18 +4,18 @@ import {
   createProductFromSearchDataAndReviews,
   limitReviewsCount,
   reviewsSortFromShortestToLongest,
-  shortenReviewIfNeeded,
+  // shortenReviewIfNeeded,
 } from "~/utils/productUtils";
 import { AMAZON_STORE_ID, UNKNOWN_IP } from "~/constants";
 import { generatePromptFromProducts } from "~/utils/promptUtils";
 import { CACHE_KEY, rateLimit, redisRestGet } from "~/server/redis";
 import type { ProductSearchData } from "~/types";
-import { getClientIp, type Request as RequestForIp } from "request-ip";
+import { ipAddress } from "@vercel/edge";
 // import { testStreamArr } from "~/constants/streaming";
 
 export const config = { runtime: "edge" };
 
-const handler = async (req: Request): Promise<Response> => {
+export default async function handler(req: Request): Promise<Response> {
   // // creating a readable stream response from test array
   // const streamTest = new ReadableStream({
   //   async start(controller) {
@@ -31,7 +31,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   // // returning the stream response
   // return new Response(streamTest);
-  const ip = getClientIp(req as unknown as RequestForIp) || UNKNOWN_IP;
+  const ip = ipAddress(req) || UNKNOWN_IP;
   const { success } = await rateLimit.limit(ip);
   if (!success || 1) {
     console.error(`Rate limit exceeded for ${ip}`);
@@ -108,11 +108,10 @@ const handler = async (req: Request): Promise<Response> => {
         break;
       }
     }
+    console.log(finalVal);
     // console.log(finalVal);
     // console.log(JSON.stringify(chunksArr));
   })().catch((e) => console.error(e));
 
   return new Response(stream);
-};
-
-export default handler;
+}
