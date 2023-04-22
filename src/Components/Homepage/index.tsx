@@ -23,7 +23,6 @@ const LoadingBar = () => {
 export function HomePage() {
   const prod1name = useHomeStore((state) => state.productName["1"]);
   const prod2name = useHomeStore((state) => state.productName["2"]);
-  const setProductName = useHomeStore((state) => state.setProductName);
   const addErrorAlert = useHomeStore((state) => state.addErrorAlert);
 
   const setProductSearchResult = useHomeStore(
@@ -109,16 +108,8 @@ export function HomePage() {
           onSubmit={handleSearchFormSubmit}
           className="mb-4 flex w-full max-w-4xl flex-col px-2 align-middle md:flex-row md:items-center md:px-0"
         >
-          <SearchInput
-            value={prod1name}
-            placeholder="Product 1"
-            onChange={(e) => setProductName("1", e.target.value)}
-          />
-          <SearchInput
-            value={prod2name}
-            placeholder="Product 2"
-            onChange={(e) => setProductName("2", e.target.value)}
-          />
+          <SearchInput productNum="1" />
+          <SearchInput productNum="2" />
           <SearchButton
             loading={searchMut.isLoading}
             disabled={isSearchDisabled}
@@ -151,12 +142,11 @@ export function HomePage() {
             >
               Run Detailed Comparison
             </button>
-            {!selectedProductId[1] ||
-              (!selectedProductId[2] && (
-                <label className="text-xs text-red-500">
-                  {"Please search and select two products to compare"}
-                </label>
-              ))}
+            {(!selectedProductId[1] || !selectedProductId[2]) && (
+              <label className="text-xs text-red-500">
+                {"Please search and select two products to compare"}
+              </label>
+            )}
             {isComparisonLoading && <LoadingBar />}
           </div>
 

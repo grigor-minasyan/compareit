@@ -1,14 +1,10 @@
-import type { ChangeEventHandler } from "react";
+import { useHomeStore } from "~/state";
+import type { ProductNum } from "~/types";
 
-export const SearchInput = ({
-  placeholder,
-  value,
-  onChange,
-}: {
-  placeholder: string;
-  value: string;
-  onChange: ChangeEventHandler<HTMLInputElement>;
-}) => {
+export const SearchInput = ({ productNum }: { productNum: ProductNum }) => {
+  const value = useHomeStore((state) => state.productName[productNum]);
+  const setProductName = useHomeStore((state) => state.setProductName);
+
   return (
     <fieldset className="mx-0 my-1 w-auto text-gray-800 md:m-2 md:w-full">
       <label htmlFor="Search" className="hidden">
@@ -31,8 +27,8 @@ export const SearchInput = ({
         </span>
         <input
           value={value}
-          placeholder={placeholder}
-          onChange={onChange}
+          placeholder={`Product ${productNum}`}
+          onChange={(e) => setProductName(productNum, e.target.value)}
           type="search"
           name="Search"
           className="w-full rounded-xl bg-gray-100 py-3 pl-10 pr-4 text-sm text-gray-800 focus:bg-gray-50 focus:ring-violet-900"

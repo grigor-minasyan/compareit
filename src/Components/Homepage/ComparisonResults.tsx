@@ -5,7 +5,6 @@ import {
 import { useHomeStore } from "~/state";
 import type { ProductNum } from "~/types";
 import { parseComparison } from "~/utils/parseComparison";
-import { truncateProductTitle } from "~/utils/productUtils";
 
 export const ComparisonResults = ({
   comparisonResult,
@@ -45,26 +44,45 @@ const ProConList = ({
 
   return list.length > 0 && product ? (
     <div className="mb-2 mt-4">
-      <h2 className="mb-1 text-lg font-bold">
-        {truncateProductTitle(product.product_title)}
-      </h2>
+      {proOrCon === "Pros" && (
+        <div className="flex flex-col md:flex-row">
+          <a
+            href={product.product_url}
+            target="_blank"
+            className="text-violet-600"
+          >
+            <h2 className="mb-1 text-lg font-bold">{product.product_title}</h2>
+          </a>
+          <a
+            href={product.product_url}
+            target="_blank"
+            className="flex justify-center rounded-xl bg-violet-500 px-8 py-2.5 text-center align-middle text-sm text-white hover:bg-violet-700 md:ml-4 md:w-80"
+          >
+            <div className="flex items-center justify-center text-center">
+              Buy now on Amazon.com
+            </div>
+          </a>
+        </div>
+      )}
       <h3 className="text-md mb-2 font-bold">{proOrCon}</h3>
       <ul className="list-inside space-y-1 text-gray-700">
         {list.map((listItem) => (
           <li className="text-md flex items-center gap-1" key={listItem}>
-            {proOrCon === "Pros" ? (
-              <CheckCircleIcon
-                width={15}
-                height={15}
-                className="text-green-800"
-              />
-            ) : (
-              <ExclamationCircleIcon
-                width={15}
-                height={15}
-                className="text-red-700"
-              />
-            )}
+            <div>
+              {proOrCon === "Pros" ? (
+                <CheckCircleIcon
+                  width={15}
+                  height={15}
+                  className="text-green-800"
+                />
+              ) : (
+                <ExclamationCircleIcon
+                  width={15}
+                  height={15}
+                  className="text-red-700"
+                />
+              )}
+            </div>
             {listItem}
           </li>
         ))}
