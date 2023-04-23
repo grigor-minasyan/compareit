@@ -16,6 +16,7 @@ export const MIN_REVIEW_LENGTH = 20;
 export const MIN_REVIEW_LENGTH_TO_SHORTEN = 500;
 
 export const AMAZON_STORE_ID = "g113872638";
+export const AMAZON_ASSOCIATES_ID = "compareit04f-20";
 
 export const TIMEOUTS_SEC = {
   REDIS: 60 * 60 * 24, // 24 hours
@@ -23,3 +24,50 @@ export const TIMEOUTS_SEC = {
 
 export const RATE_LIMIT_REQUESTS_PER_10_SEC = 5;
 export const UNKNOWN_IP = "UNKNOWN_IP";
+
+export const CATEGORIES = [
+  "Appliances",
+  "Apps & Games",
+  "Arts, Crafts & Sewing",
+  "Automotive Parts & Accessories",
+  "Baby",
+  "Beauty & Personal Care",
+  "Books",
+  "CDs & Vinyl",
+  "Cell Phones & Accessories",
+  "Clothing, Shoes & Jewelry",
+  "Women",
+  "Men",
+  "Girls",
+  "Boys",
+  "Baby",
+  "Collectibles & Fine Art",
+  "Computers",
+  "Credit and Payment Cards",
+  "Digital Educational Resources",
+  "Digital Music",
+  "Electronics",
+  "Garden & Outdoor",
+  "Gift Cards",
+  "Grocery & Gourmet Food",
+  "Handmade",
+  "Health, Household & Baby Care",
+  "Home & Business Services",
+  "Home & Kitchen",
+  "Industrial & Scientific",
+  "Kindle Store",
+  "Luggage & Travel Gear",
+  "Luxury Stores",
+  "Magazine Subscriptions",
+  "Movies & TV",
+  "Musical Instruments",
+  "Office Products",
+  "Pet Supplies",
+  "Smart Home",
+  "Software",
+  "Sports & Outdoors",
+  "Tools & Home Improvement",
+  "Toys & Games",
+  "Video Games",
+  "Random",
+] as const;

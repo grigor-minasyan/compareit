@@ -2,7 +2,7 @@ export const TopCurves = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className="transition delay-150 duration-300 ease-in-out"
-    viewBox="0 0 1440 390"
+    viewBox="0 0 1440 320"
   >
     <defs>
       <linearGradient id="a" x1="0%" x2="100%" y1="50%" y2="50%">
