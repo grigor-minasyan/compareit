@@ -59,7 +59,10 @@ const ProConList = ({
             className="flex justify-center rounded-xl bg-violet-500 px-8 py-2.5 text-center align-middle text-sm text-white hover:bg-violet-700 md:ml-4 md:w-80"
           >
             <div className="flex items-center justify-center text-center">
-              Buy now on Amazon.com
+              <span>
+                {"Buy now on Amazon.com for "}
+                <span className="font-bold">{product.product_price}</span>
+              </span>
             </div>
           </a>
         </div>

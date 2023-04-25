@@ -42,3 +42,10 @@ export const ZReviewSearchData = z.object({
   review_id: z.string(),
   review_comment: z.string().min(MIN_REVIEW_LENGTH),
 });
+
+export const ZGenComparisonRequest = z
+  .object({
+    prodId1: z.string().min(1).max(100),
+    prodId2: z.string().min(1).max(100),
+  })
+  .strict();

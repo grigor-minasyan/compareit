@@ -8,15 +8,18 @@ import { OpenAIDirect } from "./OpenAIStream";
 
 export const createProductFromSearchDataAndReviews = (
   product: ProductSearchData,
-  reviews: ReviewSearchData[],
-  storeId: string
+  reviews: ReviewSearchData[]
 ): Product => {
   return {
-    storeId,
-    id: product.asin,
+    asin: product.asin,
     title: product.product_title,
+    price: product.product_price,
+    originalPrice: product.product_original_price,
+    starRating: product.product_star_rating,
+    numRatings: product.product_num_ratings,
+    url: product.product_url,
+    photo: product.product_photo,
     slug: createSlugFromTitle(product.product_title),
-    rating: product.product_star_rating,
     reviews: reviews.map((review) => review.review_comment),
   };
 };

@@ -64,7 +64,8 @@ export function HomePage() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        ids: [selectedProductId[1], selectedProductId[2]],
+        prodId1: selectedProductId[1],
+        prodId2: selectedProductId[2],
       }),
     });
     if (!response.ok) {
@@ -88,6 +89,7 @@ export function HomePage() {
     }
     setIsComparisonRunning(false);
   };
+
   return (
     <div className="mx-0 w-screen">
       <TopCurves />

@@ -17,11 +17,11 @@ export const CACHE_KEY = {
 } as const;
 
 export const redisRestGet = async <T>(key: string) => {
-  return redis.get(key) as Promise<T>;
+  return redis.get<T>(key);
 };
 
-export const redisRestSet = (key: string, value: unknown) => {
-  return redis.set(key, value, { ex: TIMEOUTS_SEC.REDIS });
+export const redisRestSet = <T = unknown>(key: string, value: T) => {
+  return redis.set<T>(key, value, { ex: TIMEOUTS_SEC.REDIS });
 };
 
 export const redisRestSetInPipeline = (

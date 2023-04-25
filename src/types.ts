@@ -5,12 +5,16 @@ import type {
 } from "./utils/zodValidations";
 
 export type Product = {
-  id: string;
+  asin: string;
   title: string;
+  price: string;
+  originalPrice: string | null;
+  starRating: number;
+  numRatings: number;
+  url: string;
+  photo: string;
   slug: string;
-  rating: number;
   reviews: string[];
-  storeId: string;
 };
 
 export type ProductSearchData = z.infer<typeof ZProductSearchData>;

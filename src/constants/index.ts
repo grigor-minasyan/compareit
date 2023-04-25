@@ -15,11 +15,10 @@ export const MIN_REVIEW_COUNT = 10;
 export const MIN_REVIEW_LENGTH = 20;
 export const MIN_REVIEW_LENGTH_TO_SHORTEN = 500;
 
-export const AMAZON_STORE_ID = "g113872638";
 export const AMAZON_ASSOCIATES_ID = "compareit04f-20";
 
 export const TIMEOUTS_SEC = {
-  REDIS: 60 * 60 * 24, // 24 hours
+  REDIS: 60 * 60 * 24 * 5, // 5 days
 } as const;
 
 export const RATE_LIMIT_REQUESTS_PER_10_SEC = 5;
