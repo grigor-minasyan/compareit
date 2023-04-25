@@ -14,9 +14,6 @@ export const homeRouter = createTRPCRouter({
         greeting: `Hello ${input.text}`,
       };
     }),
-  getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.example.findMany();
-  }),
   searchProducts: publicProcedure
     .input(z.object({ prod1name: z.string(), prod2name: z.string() }))
     .mutation(async ({ input, ctx }) => {

@@ -1,18 +1,40 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
-  url = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
-model Example {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+model Review {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  comment   String  @db.Text
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+
+  @@index(productId)
+}
+
+model Product {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  asin          String
+  title         String   @db.TinyText
+  price         String
+  originalPrice String?
+  starRating    Float
+  numRatings    Int
+  url           String
+  photo         String
+  slug          String   @db.TinyText
+  reviews       Review[]
+
+  @@index(asin)
 }

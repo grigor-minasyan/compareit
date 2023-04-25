@@ -1,5 +1,9 @@
 import { MIN_REVIEW_LENGTH_TO_SHORTEN, TOKEN_LIMITS } from "~/constants";
-import type { Product, ProductSearchData, ReviewSearchData } from "~/types";
+import type {
+  ProductLocal,
+  ProductSearchData,
+  ReviewSearchData,
+} from "~/types";
 import {
   calculateStringTokens,
   generatePromptToShortenReview,
@@ -9,7 +13,7 @@ import { OpenAIDirect } from "./OpenAIStream";
 export const createProductFromSearchDataAndReviews = (
   product: ProductSearchData,
   reviews: ReviewSearchData[]
-): Product => {
+): ProductLocal => {
   return {
     asin: product.asin,
     title: product.product_title,
@@ -20,7 +24,7 @@ export const createProductFromSearchDataAndReviews = (
     url: product.product_url,
     photo: product.product_photo,
     slug: createSlugFromTitle(product.product_title),
-    reviews: reviews.map((review) => review.review_comment),
+    reviews: reviews.map((review) => ({ comment: review.review_comment })),
   };
 };
 

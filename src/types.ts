@@ -3,18 +3,15 @@ import type {
   ZProductSearchData,
   ZReviewSearchData,
 } from "./utils/zodValidations";
+import type { Product, Review } from "@prisma/client";
 
-export type Product = {
-  asin: string;
-  title: string;
-  price: string;
-  originalPrice: string | null;
-  starRating: number;
-  numRatings: number;
-  url: string;
-  photo: string;
-  slug: string;
-  reviews: string[];
+export type ReviewLocal = Omit<
+  Review,
+  "id" | "createdAt" | "updatedAt" | "productId"
+>;
+
+export type ProductLocal = Omit<Product, "id" | "createdAt" | "updatedAt"> & {
+  reviews: ReviewLocal[];
 };
 
 export type ProductSearchData = z.infer<typeof ZProductSearchData>;

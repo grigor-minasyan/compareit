@@ -7,6 +7,7 @@
     "openai",
     "rapidapi",
     "Ratelimit",
+    "trpc",
     "UPSTASH"
   ]
 }
