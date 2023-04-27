@@ -25,7 +25,7 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  asin          String
+  asin          String   @unique
   title         String   @db.TinyText
   price         String
   originalPrice String?
