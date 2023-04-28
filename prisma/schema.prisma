@@ -25,16 +25,33 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  asin          String   @unique
-  title         String   @db.TinyText
+  asin          String       @unique
+  title         String       @db.TinyText
   price         String
   originalPrice String?
   starRating    Float
   numRatings    Int
   url           String
   photo         String
-  slug          String   @db.TinyText
+  slug          String       @db.TinyText
   reviews       Review[]
+  asProd1Comp   Comparison[] @relation("asProd1Comp")
+  asProd2Comp   Comparison[] @relation("asProd2Comp")
 
   @@index(asin)
+}
+
+model Comparison {
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  comparisonText String  @db.Text
+  product1       Product @relation("asProd1Comp", fields: [product1Id], references: [id])
+  product1Id     Int
+  product2       Product @relation("asProd2Comp", fields: [product2Id], references: [id])
+  product2Id     Int
+
+  @@id([product1Id, product2Id])
+  @@index([product1Id])
+  @@index([product2Id])
 }

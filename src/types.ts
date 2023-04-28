@@ -14,6 +14,8 @@ export type ProductLocal = Omit<Product, "id" | "createdAt" | "updatedAt"> & {
   reviews: ReviewLocal[];
 };
 
+export type ProductWithReviews = Product & { reviews: Review[] };
+
 export type ProductSearchData = z.infer<typeof ZProductSearchData>;
 export type ReviewSearchData = z.infer<typeof ZReviewSearchData>;
 

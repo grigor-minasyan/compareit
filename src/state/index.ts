@@ -19,7 +19,6 @@ interface HomeState {
   searchResultCollapsed: {
     [key in ProductNum]: boolean;
   };
-  comparisonResult: string;
   setProductName: (num: ProductNum, name: string) => void;
   setProductSearchResult: (
     num: ProductNum,
@@ -31,7 +30,6 @@ interface HomeState {
     productId: string | null
   ) => void;
   toggleSearchResultCollapsed: (num: ProductNum) => void;
-  setComparisonResult: (result: string) => void;
   // Error alerts
   errorAlerts: ErrorAlert[];
   addErrorAlert: (message: string) => void;
@@ -60,7 +58,6 @@ export const useHomeStore = create<HomeState>()(
       "1": false,
       "2": false,
     },
-    comparisonResult: "",
     setProductName: (num, name) =>
       set((state) => ({
         productName: {
@@ -101,7 +98,6 @@ export const useHomeStore = create<HomeState>()(
           [num]: !state.searchResultCollapsed[num],
         },
       })),
-    setComparisonResult: (result) => set(() => ({ comparisonResult: result })),
     errorAlerts: [],
     addErrorAlert: (message: string) => {
       const id = uuidv4();

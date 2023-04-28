@@ -71,3 +71,5 @@ export const reviewsSortFromShortestToLongest = (
 export const truncateProductTitle = (title: string) => {
   return title.length > 30 ? title.slice(0, 100) + "..." : title;
 };
+
+export const sortProdIdsInt = (a: number, b: number) => a - b;

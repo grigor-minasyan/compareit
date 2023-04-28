@@ -14,6 +14,7 @@ import { ipAddress } from "@vercel/edge";
 import { ZGenComparisonRequest } from "~/utils/zodValidations";
 import {
   fetchProductWithReviewsFromDb,
+  insertComparison,
   insertProductWithReviews,
 } from "~/server/dbPlanetscale";
 // import { testStreamArr } from "~/constants/streaming";
@@ -53,11 +54,7 @@ const fetchProductWithReviews = async (asin: string) => {
 
   const prodLocal = createProductFromSearchDataAndReviews(prod, reviewsLimited);
 
-  // not awaiting this since it's not urgent for the customer experience
-  insertProductWithReviews(prodLocal).catch((err) =>
-    console.error("Error inserting product with reviews", err)
-  );
-  return prodLocal;
+  return insertProductWithReviews(prodLocal);
 };
 
 export default async function handler(req: Request): Promise<Response> {
@@ -126,10 +123,13 @@ export default async function handler(req: Request): Promise<Response> {
           break;
         }
       }
-      console.log(finalVal);
-      // console.log(finalVal);
-      // console.log(JSON.stringify(chunksArr));
-    })().catch((e) => console.error(e));
+      await insertComparison(prod1Clean.id, prod2Clean.id, finalVal);
+      console.log(
+        "inserting the comparison result for products: ",
+        prod1Clean.id,
+        prod2Clean.id
+      );
+    })().catch(console.error);
 
     return new Response(stream);
   } catch (e) {
