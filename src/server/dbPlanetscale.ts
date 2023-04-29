@@ -1,5 +1,5 @@
 import { connect } from "@planetscale/database";
-import type { Comparison, Product, Review } from "@prisma/client";
+import type { Product, Review } from "@prisma/client";
 import { env } from "~/env.mjs";
 import type { ProductLocal, ProductWithReviews } from "~/types";
 import { sortProdIdsInt } from "~/utils/productUtils";
@@ -24,6 +24,12 @@ export const insertProductWithReviews = async (product: ProductLocal) => {
       ]
     );
 
+    const insertedProd = (
+      await tx.execute(`SELECT * FROM Product WHERE id = ?;`, [
+        insertProdTransaction.insertId,
+      ])
+    ).rows[0] as unknown as ProductWithReviews;
+
     const reviewsTx = await tx.execute(
       `INSERT INTO Review (createdAt, updatedAt, productId, comment)
       VALUES ${Array.from(Array(product.reviews.length))
@@ -37,10 +43,9 @@ export const insertProductWithReviews = async (product: ProductLocal) => {
         .flat()
     );
 
-    const prod = insertProdTransaction.rows[0] as ProductWithReviews;
-    prod.reviews = reviewsTx.rows as Review[];
+    insertedProd.reviews = reviewsTx.rows as Review[];
 
-    return prod;
+    return insertedProd;
   });
 };
 
