@@ -17,29 +17,29 @@ const extractList = (regex: RegExp, text: string): string[] => {
   return result?.[1]
     ? result[1]
         .trim()
-        .split("\n- ")
+        .split(/\n\s*-\s*/)
         .filter((x) => x)
     : ["Analyzing reviews..."];
 };
 
 export const parseComparison = (text: string) => {
-  const introRegex = /Introduction:\n([\s\S]*?)(?=\n\nProduct|$)/;
+  const introRegex = /Introduction:\n([\s\S]*?)(?=\n([^a-zA-Z\d]*?)Product|$)/;
   const product1ProsRegex =
-    /Product 1:[\s\S]*?Pros:\n-([\s\S]*?)(?=\n\nCons|$)/;
+    /Product 1:[\s\S]*?Pros:\n\s*-\s+([\s\S]*?)(?=\n([^a-zA-Z\d]*?)Cons|$)/;
   const product1ConsRegex =
-    /Product 1:[\s\S]*?Cons:\n-([\s\S]*?)(?=\n\nProduct 2|$)/;
+    /Product 1:[\s\S]*?Cons:\n\s*-\s+([\s\S]*?)(?=\n([^a-zA-Z\d]*?)Product 2|$)/;
   const product2ProsRegex =
-    /Product 2:[\s\S]*?Pros:\n-([\s\S]*?)(?=\n\nCons|$)/;
+    /Product 2:[\s\S]*?Pros:\n\s*-\s+([\s\S]*?)(?=\n([^a-zA-Z\d]*?)Cons|$)/;
   const product2ConsRegex =
-    /Product 2:[\s\S]*?Cons:\n-([\s\S]*?)(?=\n\nConclusion|$)/;
+    /Product 2:[\s\S]*?Cons:\n\s*-\s+([\s\S]*?)(?=\n([^a-zA-Z\d]*?)Conclusion|$)/;
   const conclusionRegex = /Conclusion:\n([\s\S]*?)(?=$|$)/;
 
-  const intro: string = extractText(introRegex, text);
-  const product1Pros: string[] = extractList(product1ProsRegex, text);
-  const product1Cons: string[] = extractList(product1ConsRegex, text);
-  const product2Pros: string[] = extractList(product2ProsRegex, text);
-  const product2Cons: string[] = extractList(product2ConsRegex, text);
-  const conclusion: string = extractText(conclusionRegex, text);
+  const intro = extractText(introRegex, text);
+  const product1Pros = extractList(product1ProsRegex, text);
+  const product1Cons = extractList(product1ConsRegex, text);
+  const product2Pros = extractList(product2ProsRegex, text);
+  const product2Cons = extractList(product2ConsRegex, text);
+  const conclusion = extractText(conclusionRegex, text);
 
   const result: Result = {
     introduction: intro,
