@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { log } from "next-axiom";
 import { z } from "zod";
 import { UNKNOWN_IP } from "~/constants";
 
@@ -20,7 +21,7 @@ export const homeRouter = createTRPCRouter({
       const ipToLimit = ctx.reqIp || UNKNOWN_IP;
       const { success } = await rateLimit.limit(ipToLimit);
       if (!success) {
-        console.error(`Rate limit exceeded for ${ipToLimit}`);
+        log.error(`Rate limit exceeded for ${ipToLimit}`);
         throw new TRPCError({
           code: "TOO_MANY_REQUESTS",
           message: "Too many searches, please slow down",

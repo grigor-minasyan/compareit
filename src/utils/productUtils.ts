@@ -9,6 +9,7 @@ import {
   generatePromptToShortenReview,
 } from "./promptUtils";
 import { OpenAIDirect } from "./OpenAIStream";
+import { log } from "next-axiom";
 
 export const createProductFromSearchDataAndReviews = (
   product: ProductSearchData,
@@ -56,7 +57,7 @@ export const limitReviewsCount = (reviews: ReviewSearchData[]) => {
     }
     return acc;
   }, []);
-  console.log(
+  log.info(
     `Limited the number of reviews from ${reviews.length} to ${limitedReviews.length}`
   );
 

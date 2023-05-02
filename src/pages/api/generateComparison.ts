@@ -17,6 +17,8 @@ import {
   insertComparison,
   insertProductWithReviews,
 } from "~/server/dbPlanetscale";
+import { log } from "next-axiom";
+import { serializeError } from "serialize-error";
 // import { testStreamArr } from "~/constants/streaming";
 
 export const config = { runtime: "edge" };
@@ -25,7 +27,7 @@ const fetchProductWithReviews = async (asin: string) => {
   // try to get the clean products first from database
   const cleanProd = await fetchProductWithReviewsFromDb(asin);
   if (cleanProd) {
-    console.info("Found clean product in db");
+    log.info("Found clean product in db");
     return cleanProd;
   }
 
@@ -34,7 +36,7 @@ const fetchProductWithReviews = async (asin: string) => {
   );
 
   if (!prod) {
-    console.warn(
+    log.warn(
       `Product not found in cache when generating comparison, asin: ${asin}`
     );
     return null;
@@ -63,7 +65,7 @@ export default async function handler(req: Request): Promise<Response> {
     const ip = ipAddress(req) || UNKNOWN_IP;
     const { success } = await rateLimit.limit(ip);
     if (!success) {
-      console.warn(`Rate limit exceeded for ${ip}`);
+      log.warn(`Rate limit exceeded for ${ip}`);
       return new Response("Too many comparisons, please slow down", {
         status: 429,
       });
@@ -124,16 +126,16 @@ export default async function handler(req: Request): Promise<Response> {
         }
       }
       await insertComparison(prod1Clean.id, prod2Clean.id, finalVal);
-      console.log(
-        "inserting the comparison result for products: ",
-        prod1Clean.id,
-        prod2Clean.id
+      log.info(
+        `inserting the comparison result for products:, ${prod1Clean.id}, ${prod2Clean.id}`
       );
-    })().catch(console.error);
+    })().catch((e: unknown) =>
+      log.error("Error when saving the comparison", serializeError(e))
+    );
 
     return new Response(stream);
   } catch (e) {
-    console.error('Error in "generateComparison" handler', e);
+    log.error('Error in "generateComparison" handler', serializeError(e));
     return new Response(
       "Something went wrong and we are actively investigating, please try again later",
       { status: 500 }

@@ -4,6 +4,8 @@ import {
   type ReconnectInterval,
 } from "eventsource-parser";
 import { backOff } from "exponential-backoff";
+import { log } from "next-axiom";
+import { serializeError } from "serialize-error";
 import { env } from "~/env.mjs";
 
 export async function OpenAIStream(prompt: string) {
@@ -95,10 +97,10 @@ export async function OpenAIDirect(prompt: string) {
       }),
     {
       jitter: "full",
-      retry(e, attemptNumber) {
-        console.error(
+      retry(e: unknown, attemptNumber) {
+        log.error(
           `OpenAIDirect: Attempt #${attemptNumber} failed. Error:`,
-          e
+          serializeError(e)
         );
         return true;
       },

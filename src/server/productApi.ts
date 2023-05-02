@@ -9,6 +9,8 @@ import { env } from "~/env.mjs";
 import { backOff } from "exponential-backoff";
 import { CACHE_KEY, redisRestGet, redisRestSetInPipeline } from "./redis";
 import { redisRestSet } from "./redis";
+import { log } from "next-axiom";
+import { serializeError } from "serialize-error";
 
 const AMAZON_API_BASE_URL = "https://real-time-amazon-data.p.rapidapi.com";
 
@@ -19,7 +21,7 @@ export const AmazonApiSearch = async (
     CACHE_KEY.AMZ_API_PRODUCT_QUERY(query)
   );
   if (cached) {
-    console.log("AmazonApiSearch: returning cached results for query:", query);
+    log.info("AmazonApiSearch: returning cached results for query:", { query });
     return cached;
   }
 
@@ -77,10 +79,10 @@ export const AmazonApiSearch = async (
     },
     {
       jitter: "full",
-      retry(e, attemptNumber) {
-        console.error(
+      retry(e: unknown, attemptNumber) {
+        log.error(
           `AmazonApiSearch: Attempt #${attemptNumber} failed. Error:`,
-          e
+          serializeError(e)
         );
         return true;
       },
@@ -96,12 +98,10 @@ export const AmazonApiReviews = async (
     CACHE_KEY.AMZ_API_PRODUCT_REVIEWS(asin, page)
   );
   if (cached) {
-    console.log(
-      "AmazonApiReviews: returning cached results for asin:",
+    log.info("AmazonApiReviews: returning cached results for asin and page", {
       asin,
-      "page:",
-      page
-    );
+      page,
+    });
     return cached;
   }
 
@@ -153,10 +153,10 @@ export const AmazonApiReviews = async (
     },
     {
       jitter: "full",
-      retry(e, attemptNumber) {
-        console.error(
+      retry(e: unknown, attemptNumber) {
+        log.error(
           `AmazonApiReviews: Attempt #${attemptNumber} failed. Error:`,
-          e
+          serializeError(e)
         );
         return true;
       },
