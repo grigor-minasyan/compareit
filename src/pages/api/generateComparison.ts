@@ -2,6 +2,7 @@ import { OpenAIStream } from "../../utils/OpenAIStream";
 import { AmazonApiReviews } from "~/server/productApi";
 import {
   createProductFromSearchDataAndReviews,
+  getStreamFromString,
   limitReviewsCount,
   reviewsSortFromShortestToLongest,
   // shortenReviewIfNeeded,
@@ -13,6 +14,7 @@ import type { ProductSearchData } from "~/types";
 import { ipAddress } from "@vercel/edge";
 import { ZGenComparisonRequest } from "~/utils/zodValidations";
 import {
+  fetchComparisonFromDb,
   fetchProductWithReviewsFromDb,
   insertComparison,
   insertProductWithReviews,
@@ -27,6 +29,7 @@ const fetchProductWithReviews = async (asin: string) => {
   // try to get the clean products first from database
   const cleanProd = await fetchProductWithReviewsFromDb(asin);
   if (cleanProd) {
+    // TODO update the cleanProd in db with the data from redis
     log.info("Found clean product in db");
     return cleanProd;
   }
@@ -56,7 +59,11 @@ const fetchProductWithReviews = async (asin: string) => {
 
   const prodLocal = createProductFromSearchDataAndReviews(prod, reviewsLimited);
 
-  return insertProductWithReviews(prodLocal);
+  // not awaiting for speed
+  insertProductWithReviews(prodLocal).catch((err: unknown) => {
+    log.error("Error inserting product with reviews", serializeError(err));
+  });
+  return prodLocal;
 };
 
 export default async function handler(req: Request): Promise<Response> {
@@ -80,21 +87,6 @@ export default async function handler(req: Request): Promise<Response> {
     }
     const { prodId1, prodId2 } = reqJson.data;
 
-    // // creating a readable stream response from test array
-    // const streamTest = new ReadableStream({
-    //   async start(controller) {
-    //     const encoder = new TextEncoder();
-    //     for (const str of testStreamArr) {
-    //       const data = encoder.encode(str);
-    //       controller.enqueue(data);
-    //       await new Promise((resolve) => setTimeout(resolve, 15));
-    //     }
-    //     controller.close();
-    //   },
-    // });
-
-    // // returning the stream response
-    // return new Response(streamTest);
     const [prod1Clean, prod2Clean] = await Promise.all([
       fetchProductWithReviews(prodId1),
       fetchProductWithReviews(prodId2),
@@ -102,6 +94,15 @@ export default async function handler(req: Request): Promise<Response> {
 
     if (!prod1Clean || !prod2Clean) {
       return new Response("No products found", { status: 400 });
+    }
+
+    // ------------------------------ Checking existing comparisons ------------------------------
+    const existingComparison = await fetchComparisonFromDb(prodId1, prodId2);
+    if (existingComparison) {
+      log.info(
+        `Found existing comparison for products:, ${prodId1}, ${prodId2}`
+      );
+      return new Response(getStreamFromString(existingComparison));
     }
 
     // ------------------------------ Generating the prompt ------------------------------
@@ -125,10 +126,11 @@ export default async function handler(req: Request): Promise<Response> {
           break;
         }
       }
-      await insertComparison(prod1Clean.id, prod2Clean.id, finalVal);
+      await insertComparison(prod1Clean.asin, prod2Clean.asin, finalVal);
       log.info(
-        `inserting the comparison result for products:, ${prod1Clean.id}, ${prod2Clean.id}`
+        `inserting the comparison result for products:, ${prod1Clean.asin}, ${prod2Clean.asin}`
       );
+      // TODO validate the comparison to be valid, if not log an error
     })().catch((e: unknown) =>
       log.error("Error when saving the comparison", serializeError(e))
     );

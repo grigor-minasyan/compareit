@@ -13,19 +13,18 @@ model Review {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  comment   String  @db.Text
-  product   Product @relation(fields: [productId], references: [id])
-  productId Int
+  comment     String  @db.Text
+  product     Product @relation(fields: [productAsin], references: [asin])
+  productAsin String
 
-  @@index(productId)
+  @@index(productAsin)
 }
 
 model Product {
-  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  asin          String       @unique
+  asin          String       @id
   title         String       @db.TinyText
   price         String
   originalPrice String?
@@ -37,8 +36,6 @@ model Product {
   reviews       Review[]
   asProd1Comp   Comparison[] @relation("asProd1Comp")
   asProd2Comp   Comparison[] @relation("asProd2Comp")
-
-  @@index(asin)
 }
 
 model Comparison {
@@ -46,12 +43,12 @@ model Comparison {
   updatedAt DateTime @updatedAt
 
   comparisonText String  @db.Text
-  product1       Product @relation("asProd1Comp", fields: [product1Id], references: [id])
-  product1Id     Int
-  product2       Product @relation("asProd2Comp", fields: [product2Id], references: [id])
-  product2Id     Int
+  product1       Product @relation("asProd1Comp", fields: [product1Asin], references: [asin])
+  product1Asin   String
+  product2       Product @relation("asProd2Comp", fields: [product2Asin], references: [asin])
+  product2Asin   String
 
-  @@id([product1Id, product2Id])
-  @@index([product1Id])
-  @@index([product2Id])
+  @@id([product1Asin, product2Asin])
+  @@index([product1Asin])
+  @@index([product2Asin])
 }

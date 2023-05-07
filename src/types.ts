@@ -7,10 +7,10 @@ import type { Product, Review } from "@prisma/client";
 
 export type ReviewLocal = Omit<
   Review,
-  "id" | "createdAt" | "updatedAt" | "productId"
+  "id" | "createdAt" | "updatedAt" | "productAsin"
 >;
 
-export type ProductLocal = Omit<Product, "id" | "createdAt" | "updatedAt"> & {
+export type ProductLocal = Omit<Product, "createdAt" | "updatedAt"> & {
   reviews: ReviewLocal[];
 };
 

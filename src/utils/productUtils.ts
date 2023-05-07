@@ -33,6 +33,7 @@ export const createSlugFromTitle = (title: string) => {
   return title
     .toLowerCase()
     .replace(/-/g, " ")
+    .replace(/[^a-zA-Z0-9]/g, " ")
     .replace(/\s+/g, " ")
     .replace(/[^a-z0-9]/g, "-");
 };
@@ -74,3 +75,31 @@ export const truncateProductTitle = (title: string) => {
 };
 
 export const sortProdIdsInt = (a: number, b: number) => a - b;
+export const sortProdIdsStr = (a: string, b: string) => a.localeCompare(b);
+
+const breakStringToRandomChunks = (str: string) => {
+  const chunks = [];
+  let remaining = str;
+  while (remaining.length > 0) {
+    const chunkLength = Math.floor(Math.random() * 10) + 5;
+    chunks.push(remaining.slice(0, chunkLength));
+    remaining = remaining.slice(chunkLength);
+  }
+  return chunks;
+};
+
+export const getStreamFromString = (str: string) => {
+  const chunks = breakStringToRandomChunks(str);
+  // creating a readable stream response from test array
+  return new ReadableStream({
+    async start(controller) {
+      const encoder = new TextEncoder();
+      for (const str of chunks) {
+        const data = encoder.encode(str);
+        controller.enqueue(data);
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+      controller.close();
+    },
+  });
+};

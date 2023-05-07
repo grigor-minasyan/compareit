@@ -1,14 +1,14 @@
 import { connect } from "@planetscale/database";
-import type { Product, Review } from "@prisma/client";
+import type { Comparison, Product, Review } from "@prisma/client";
 import { env } from "~/env.mjs";
 import type { ProductLocal, ProductWithReviews } from "~/types";
-import { sortProdIdsInt } from "~/utils/productUtils";
+import { sortProdIdsStr } from "~/utils/productUtils";
 
 const dbRestConn = connect({ url: env.DATABASE_URL });
 
 export const insertProductWithReviews = async (product: ProductLocal) => {
   return dbRestConn.transaction(async (tx) => {
-    const insertProdTransaction = await tx.execute(
+    await tx.execute(
       `INSERT INTO Product (createdAt, updatedAt, asin, title, price, originalPrice, starRating, numRatings, url, photo, slug)
       VALUES (NOW(), NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
       [
@@ -24,28 +24,13 @@ export const insertProductWithReviews = async (product: ProductLocal) => {
       ]
     );
 
-    const insertedProd = (
-      await tx.execute(`SELECT * FROM Product WHERE id = ?;`, [
-        insertProdTransaction.insertId,
-      ])
-    ).rows[0] as unknown as ProductWithReviews;
-
-    const reviewsTx = await tx.execute(
-      `INSERT INTO Review (createdAt, updatedAt, productId, comment)
+    await tx.execute(
+      `INSERT INTO Review (createdAt, updatedAt, productAsin, comment)
       VALUES ${Array.from(Array(product.reviews.length))
         .map(() => "(NOW(), NOW(), ?, ?)")
         .join(", ")};`,
-      product.reviews
-        .map((review) => [
-          insertProdTransaction.insertId,
-          review.comment.trim(),
-        ])
-        .flat()
+      product.reviews.map((review) => [product.asin, review.comment]).flat()
     );
-
-    insertedProd.reviews = reviewsTx.rows as Review[];
-
-    return insertedProd;
   });
 };
 
@@ -59,26 +44,41 @@ export const fetchProductWithReviewsFromDb = async (asin: string) => {
   const product = productQuery.rows[0] as Product;
 
   const reviewsQuery = await dbRestConn.execute(
-    `SELECT * FROM Review WHERE productId = ?;`,
-    [product.id]
+    `SELECT * FROM Review WHERE productAsin = ?;`,
+    [product.asin]
   );
   const reviews = reviewsQuery.rows as Review[];
 
   if (reviews.length === 0) return null;
 
-  (product as unknown as ProductWithReviews).reviews = reviews;
+  (product as ProductWithReviews).reviews = reviews;
 
   return product as ProductWithReviews;
 };
 
 export const insertComparison = async (
-  prodId1: number,
-  prodId2: number,
+  asin1: string,
+  asin2: string,
   comparisonText: string
 ) => {
   return dbRestConn.execute(
-    `INSERT INTO Comparison (createdAt, updatedAt, product1Id, product2Id, comparisonText)
+    `INSERT INTO Comparison (createdAt, updatedAt, product1Asin, product2Asin, comparisonText)
       VALUES (NOW(), NOW(), ?, ?, ?);`,
-    [...[prodId1, prodId2].sort(sortProdIdsInt), comparisonText]
+    [...[asin1, asin2].sort(sortProdIdsStr), comparisonText]
   );
+};
+
+export const fetchComparisonFromDb = async (
+  asin1: string,
+  asin2: string
+): Promise<string | null> => {
+  const comparisonQuery = await dbRestConn.execute(
+    `SELECT * FROM Comparison WHERE product1Asin = ? AND product2Asin = ?;`,
+    [...[asin1, asin2].sort(sortProdIdsStr)]
+  );
+  if (comparisonQuery.rows.length === 0) return null;
+
+  const comparison = comparisonQuery.rows[0] as Comparison;
+
+  return comparison.comparisonText;
 };
