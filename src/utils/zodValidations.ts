@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { MIN_REVIEW_COUNT, MIN_REVIEW_LENGTH } from "~/constants";
+import {
+  MAX_REVIEW_LENGTH,
+  MIN_REVIEW_COUNT,
+  MIN_REVIEW_LENGTH,
+} from "~/constants";
 
 export const ZProductSearchApiResponse = z.object({
   status: z.literal("OK"),
@@ -40,7 +44,11 @@ export const ZReviewSearchApiResponse = z.object({
 
 export const ZReviewSearchData = z.object({
   review_id: z.string().trim(),
-  review_comment: z.string().trim().min(MIN_REVIEW_LENGTH),
+  review_comment: z
+    .string()
+    .trim()
+    .min(MIN_REVIEW_LENGTH)
+    .max(MAX_REVIEW_LENGTH),
 });
 
 export const ZGenComparisonRequest = z

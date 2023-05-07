@@ -18,10 +18,10 @@ Reviews of product ${i + 1}: ${product.reviews
 
 export const generatePromptToShortenReview = (
   review: string
-) => `Give me a summary of this review within 3 sentences. Here is the review.
+) => `Your task is to generate a short summary of a product review from an ecommerce site. Summarize the review below, delimited by triple 
+backticks in at most 50 words. 
 
-${review}
-`;
+Review: \`\`\`${review}\`\`\``;
 
 export const calculateStringTokens = (str: string) => {
   return Math.round(str.length / CHAR_PER_TOKEN_RATIO); // 3.8 is optimistic, usually it's slightly more than 4

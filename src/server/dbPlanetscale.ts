@@ -34,6 +34,26 @@ export const insertProductWithReviews = async (product: ProductLocal) => {
   });
 };
 
+export const updateProductDetails = async (
+  product: Omit<ProductLocal, "reviews">
+) => {
+  return dbRestConn.execute(
+    `UPDATE Product SET updatedAt = NOW(), title = ?, price = ?, originalPrice = ?, starRating = ?, numRatings = ?, url = ?, photo = ?, slug = ?
+    WHERE asin = ?;`,
+    [
+      product.title,
+      product.price,
+      product.originalPrice,
+      product.starRating,
+      product.numRatings,
+      product.url,
+      product.photo,
+      product.slug,
+      product.asin,
+    ]
+  );
+};
+
 export const fetchProductWithReviewsFromDb = async (asin: string) => {
   const productQuery = await dbRestConn.execute(
     `SELECT * FROM Product WHERE asin = ?;`,

@@ -13,6 +13,7 @@ export const CHAR_PER_TOKEN_RATIO = 4; // lower is more conservative, openAI giv
 
 export const MIN_REVIEW_COUNT = 10;
 export const MIN_REVIEW_LENGTH = 20;
+export const MAX_REVIEW_LENGTH = 2000;
 export const MIN_REVIEW_LENGTH_TO_SHORTEN = 500;
 
 export const AMAZON_ASSOCIATES_ID = "compareit04f-20";

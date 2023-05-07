@@ -52,3 +52,15 @@ export const parseComparison = (text: string) => {
 
   return result;
 };
+
+export const checkFaultyComparison = (text: string) => {
+  const parsed = parseComparison(text);
+  return (
+    parsed.introduction.length < 100 ||
+    parsed.product1Pros.length < 4 ||
+    parsed.product1Cons.length < 4 ||
+    parsed.product2Pros.length < 4 ||
+    parsed.product2Cons.length < 4 ||
+    parsed.conclusion.length < 100
+  );
+};

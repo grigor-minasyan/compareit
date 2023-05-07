@@ -29,6 +29,22 @@ export const createProductFromSearchDataAndReviews = (
   };
 };
 
+export const createProductFromSearchData = (
+  product: ProductSearchData
+): Omit<ProductLocal, "reviews"> => {
+  return {
+    asin: product.asin,
+    title: product.product_title,
+    price: product.product_price,
+    originalPrice: product.product_original_price,
+    starRating: product.product_star_rating,
+    numRatings: product.product_num_ratings,
+    url: product.product_url,
+    photo: product.product_photo,
+    slug: createSlugFromTitle(product.product_title),
+  };
+};
+
 export const createSlugFromTitle = (title: string) => {
   return title
     .toLowerCase()
@@ -44,8 +60,6 @@ export const shortenReviewIfNeeded = async (review: ReviewSearchData) => {
       generatePromptToShortenReview(review.review_comment)
     );
   }
-
-  return review;
 };
 
 export const limitReviewsCount = (reviews: ReviewSearchData[]) => {
@@ -77,19 +91,15 @@ export const truncateProductTitle = (title: string) => {
 export const sortProdIdsInt = (a: number, b: number) => a - b;
 export const sortProdIdsStr = (a: string, b: string) => a.localeCompare(b);
 
-const breakStringToRandomChunks = (str: string) => {
-  const chunks = [];
+export const getStreamFromString = (str: string) => {
+  const chunks: string[] = [];
   let remaining = str;
   while (remaining.length > 0) {
     const chunkLength = Math.floor(Math.random() * 10) + 5;
     chunks.push(remaining.slice(0, chunkLength));
     remaining = remaining.slice(chunkLength);
   }
-  return chunks;
-};
 
-export const getStreamFromString = (str: string) => {
-  const chunks = breakStringToRandomChunks(str);
   // creating a readable stream response from test array
   return new ReadableStream({
     async start(controller) {
@@ -97,7 +107,7 @@ export const getStreamFromString = (str: string) => {
       for (const str of chunks) {
         const data = encoder.encode(str);
         controller.enqueue(data);
-        await new Promise((resolve) => setTimeout(resolve, 20));
+        await new Promise((resolve) => setTimeout(resolve, 50));
       }
       controller.close();
     },

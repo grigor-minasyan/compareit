@@ -1,11 +1,12 @@
 import { OpenAIStream } from "../../utils/OpenAIStream";
 import { AmazonApiReviews } from "~/server/productApi";
 import {
+  createProductFromSearchData,
   createProductFromSearchDataAndReviews,
   getStreamFromString,
   limitReviewsCount,
   reviewsSortFromShortestToLongest,
-  // shortenReviewIfNeeded,
+  shortenReviewIfNeeded,
 } from "~/utils/productUtils";
 import { UNKNOWN_IP } from "~/constants";
 import { generatePromptFromProducts } from "~/utils/promptUtils";
@@ -18,18 +19,31 @@ import {
   fetchProductWithReviewsFromDb,
   insertComparison,
   insertProductWithReviews,
+  updateProductDetails,
 } from "~/server/dbPlanetscale";
 import { log } from "next-axiom";
 import { serializeError } from "serialize-error";
-// import { testStreamArr } from "~/constants/streaming";
+import { checkFaultyComparison } from "~/utils/parseComparison";
 
 export const config = { runtime: "edge" };
+
+const updateProductFromCacheWithAsin = async (asin: string) => {
+  const prod = await redisRestGet<ProductSearchData>(
+    CACHE_KEY.AMZ_API_PRODUCT(asin)
+  );
+  if (!prod) return;
+  const prodLocal = createProductFromSearchData(prod);
+  await updateProductDetails(prodLocal);
+};
 
 const fetchProductWithReviews = async (asin: string) => {
   // try to get the clean products first from database
   const cleanProd = await fetchProductWithReviewsFromDb(asin);
   if (cleanProd) {
-    // TODO update the cleanProd in db with the data from redis
+    // async updating the db with updated product details from cache
+    updateProductFromCacheWithAsin(asin).catch((err: unknown) => {
+      log.error("Error updating product from cache", serializeError(err));
+    });
     log.info("Found clean product in db");
     return cleanProd;
   }
@@ -45,15 +59,16 @@ const fetchProductWithReviews = async (asin: string) => {
     return null;
   }
 
-  const [reviewsPg1, reviewsPg2] = await Promise.all([
+  const [reviewsPg1, reviewsPg2, reviewsPg3, reviewsPg4] = await Promise.all([
     AmazonApiReviews(asin),
     AmazonApiReviews(asin, 2),
+    AmazonApiReviews(asin, 3),
+    AmazonApiReviews(asin, 4),
   ]);
 
-  const reviews = [...reviewsPg1, ...reviewsPg2];
+  const reviews = [...reviewsPg1, ...reviewsPg2, ...reviewsPg3, ...reviewsPg4];
   // TODO calculate how much token is used for this and store it in the db for later analytics
-  // TODO figure this out since it's very expensive
-  // await Promise.all(reviews.map(shortenReviewIfNeeded));
+  await Promise.all(reviews.map(shortenReviewIfNeeded));
   reviews.sort(reviewsSortFromShortestToLongest);
   const reviewsLimited = limitReviewsCount(reviews);
 
@@ -77,7 +92,6 @@ export default async function handler(req: Request): Promise<Response> {
         status: 429,
       });
     }
-
     // ------------------------------ Checking the request ------------------------------
     const reqJson = await ZGenComparisonRequest.safeParseAsync(
       await req.json()
@@ -86,7 +100,7 @@ export default async function handler(req: Request): Promise<Response> {
       return new Response("Bad request", { status: 400 });
     }
     const { prodId1, prodId2 } = reqJson.data;
-
+    // ------------------------------ Fetching the products --------------before the comparison to update the prods
     const [prod1Clean, prod2Clean] = await Promise.all([
       fetchProductWithReviews(prodId1),
       fetchProductWithReviews(prodId2),
@@ -95,7 +109,6 @@ export default async function handler(req: Request): Promise<Response> {
     if (!prod1Clean || !prod2Clean) {
       return new Response("No products found", { status: 400 });
     }
-
     // ------------------------------ Checking existing comparisons ------------------------------
     const existingComparison = await fetchComparisonFromDb(prodId1, prodId2);
     if (existingComparison) {
@@ -104,7 +117,6 @@ export default async function handler(req: Request): Promise<Response> {
       );
       return new Response(getStreamFromString(existingComparison));
     }
-
     // ------------------------------ Generating the prompt ------------------------------
     const prompt = generatePromptFromProducts([prod1Clean, prod2Clean]);
 
@@ -130,7 +142,11 @@ export default async function handler(req: Request): Promise<Response> {
       log.info(
         `inserting the comparison result for products:, ${prod1Clean.asin}, ${prod2Clean.asin}`
       );
-      // TODO validate the comparison to be valid, if not log an error
+      if (checkFaultyComparison(finalVal)) {
+        log.error(
+          `Faulty comparison found for products, please check ${prod1Clean.asin}, ${prod2Clean.asin}`
+        );
+      }
     })().catch((e: unknown) =>
       log.error("Error when saving the comparison", serializeError(e))
     );
