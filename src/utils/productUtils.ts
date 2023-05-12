@@ -29,6 +29,21 @@ export const createProductFromSearchData = (
   };
 };
 
+export const createProductSearchDataFromProduct = (
+  product: Omit<ProductLocal, "reviews">
+): ProductSearchData => {
+  return {
+    asin: product.asin,
+    product_title: product.title,
+    product_price: product.price,
+    product_original_price: product.originalPrice,
+    product_star_rating: product.starRating,
+    product_num_ratings: product.numRatings,
+    product_url: product.url,
+    product_photo: product.photo,
+  };
+};
+
 export const createSlugFromTitle = (title: string) => {
   return title
     .toLowerCase()

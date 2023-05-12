@@ -2,27 +2,53 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/24/solid";
+import type { Product } from "@prisma/client";
 import { useHomeStore } from "~/state";
-import type { ProductNum } from "~/types";
+import type { ProductNum, ProductSearchData } from "~/types";
 import { parseComparison } from "~/utils/parseComparison";
+import { createProductSearchDataFromProduct } from "~/utils/productUtils";
 
 export const ComparisonResults = ({
   comparisonResult,
+  product1,
+  product2,
 }: {
   comparisonResult: string;
+  product1?: Product;
+  product2?: Product;
 }) => {
   const parsed = parseComparison(comparisonResult);
-
+  const product1SearchData =
+    product1 && createProductSearchDataFromProduct(product1);
+  const product2SearchData =
+    product2 && createProductSearchDataFromProduct(product2);
   return (
     <div className="mx-1 mt-8">
-      <h2 className="mb-2 text-2xl font-bold">
-        Here is the comparison result after analyzing the reviews
-      </h2>
       <p className="whitespace-pre-line text-lg">{parsed.introduction}</p>
-      <ProConList list={parsed.product1Pros} proOrCon="Pros" productNum="1" />
-      <ProConList list={parsed.product1Cons} proOrCon="Cons" productNum="1" />
-      <ProConList list={parsed.product2Pros} proOrCon="Pros" productNum="2" />
-      <ProConList list={parsed.product2Cons} proOrCon="Cons" productNum="2" />
+      <ProConList
+        list={parsed.product1Pros}
+        proOrCon="Pros"
+        productNum="1"
+        product={product1SearchData}
+      />
+      <ProConList
+        list={parsed.product1Cons}
+        proOrCon="Cons"
+        productNum="1"
+        product={product1SearchData}
+      />
+      <ProConList
+        list={parsed.product2Pros}
+        proOrCon="Pros"
+        productNum="2"
+        product={product2SearchData}
+      />
+      <ProConList
+        list={parsed.product2Cons}
+        proOrCon="Cons"
+        productNum="2"
+        product={product2SearchData}
+      />
       <p className="whitespace-pre-line text-lg">{parsed.conclusion}</p>
     </div>
   );
@@ -32,15 +58,17 @@ const ProConList = ({
   proOrCon,
   list,
   productNum,
+  product: productProp,
 }: {
   proOrCon: "Pros" | "Cons";
   list: string[];
   productNum: ProductNum;
+  product?: ProductSearchData;
 }) => {
   const selectedProductForComparison = useHomeStore(
     (state) => state.selectedProductForComparison
   );
-  const product = selectedProductForComparison[productNum];
+  const product = productProp || selectedProductForComparison[productNum];
 
   return list.length > 0 && product ? (
     <div className="mb-2 mt-4">

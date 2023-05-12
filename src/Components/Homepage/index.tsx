@@ -7,6 +7,11 @@ import { SearchResultsWrapper } from "./SearchResultsWrapper";
 import { TopCurves } from "./TopCurves";
 import { LOADING_BAR_TEXTS, WebsiteName } from "~/constants";
 import { ComparisonResults } from "./ComparisonResults";
+import {
+  ContainerLevel1,
+  ContainerLevel2,
+  ContainerForComparisonResults,
+} from "../Containers";
 
 const LoadingBar = () => {
   const [loadingTextIndex, setLoadingTextIndex] = useState(0);
@@ -101,9 +106,9 @@ export function HomePage() {
   };
 
   return (
-    <div className="mx-0 w-screen">
+    <ContainerLevel1>
       <TopCurves />
-      <div className="container mx-auto flex flex-col items-center py-8">
+      <ContainerLevel2>
         <h1 className="mb-4 text-5xl font-bold">
           {WebsiteName.substring(0, WebsiteName.length - 2)}
           <span className="text-violet-900">
@@ -127,7 +132,7 @@ export function HomePage() {
             disabled={isSearchDisabled}
           />
         </form>
-        <div className="my-4 w-full max-w-4xl">
+        <ContainerForComparisonResults>
           <div className="flex flex-col lg:flex-row">
             <SearchResultsWrapper productNum="1" />
             <SearchResultsWrapper productNum="2" />
@@ -165,8 +170,8 @@ export function HomePage() {
           {!!comparisonResult && (
             <ComparisonResults comparisonResult={comparisonResult} />
           )}
-        </div>
-      </div>
-    </div>
+        </ContainerForComparisonResults>
+      </ContainerLevel2>
+    </ContainerLevel1>
   );
 }
