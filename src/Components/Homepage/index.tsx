@@ -12,14 +12,10 @@ const LoadingBar = () => {
   const [loadingTextIndex, setLoadingTextIndex] = useState(0);
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
+    setTimeout(() => {
       setLoadingTextIndex((prev) => (prev + 1) % LOADING_BAR_TEXTS.length);
     }, 1500);
-
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, []);
+  }, [loadingTextIndex]);
 
   return (
     <div className="my-2 w-full">
