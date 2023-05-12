@@ -33,22 +33,38 @@ model Product {
   url           String
   photo         String
   slug          String       @db.TinyText
-  reviews       Review[]
+  category      Category     @relation(fields: [categorySlug], references: [slug])
+  categorySlug  String
+  Review        Review[]
   asProd1Comp   Comparison[] @relation("asProd1Comp")
   asProd2Comp   Comparison[] @relation("asProd2Comp")
+
+  @@index([categorySlug])
 }
 
 model Comparison {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  comparisonText String  @db.Text
-  product1       Product @relation("asProd1Comp", fields: [product1Asin], references: [asin])
+  comparisonText String   @db.Text
+  slug           String   @unique
+  category       Category @relation(fields: [categorySlug], references: [slug])
+  categorySlug   String
+  product1       Product  @relation("asProd1Comp", fields: [product1Asin], references: [asin])
   product1Asin   String
-  product2       Product @relation("asProd2Comp", fields: [product2Asin], references: [asin])
+  product2       Product  @relation("asProd2Comp", fields: [product2Asin], references: [asin])
   product2Asin   String
 
   @@id([product1Asin, product2Asin])
   @@index([product1Asin])
   @@index([product2Asin])
+  @@index([slug])
+  @@index([categorySlug])
+}
+
+model Category {
+  slug       String       @id
+  name       String       @unique
+  Product    Product[]
+  Comparison Comparison[]
 }

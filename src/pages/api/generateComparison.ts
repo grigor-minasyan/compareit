@@ -1,8 +1,8 @@
 import { OpenAIStream } from "../../utils/OpenAIStream";
-import { AmazonApiReviews } from "~/server/productApi";
+import { AmazonApiReviews, getCorrectCategory } from "~/server/productApi";
 import {
   createProductFromSearchData,
-  createProductFromSearchDataAndReviews,
+  createSlugFromTitle,
   getStreamFromString,
   limitReviewsCount,
   reviewsSortFromShortestToLongest,
@@ -11,7 +11,11 @@ import {
 import { UNKNOWN_IP } from "~/constants";
 import { generatePromptFromProducts } from "~/utils/promptUtils";
 import { CACHE_KEY, rateLimit, redisRestGet } from "~/server/redis";
-import type { ProductSearchData } from "~/types";
+import type {
+  ProductLocal,
+  ProductSearchData,
+  ReviewSearchData,
+} from "~/types";
 import { ipAddress } from "@vercel/edge";
 import { ZGenComparisonRequest } from "~/utils/zodValidations";
 import {
@@ -26,6 +30,27 @@ import { serializeError } from "serialize-error";
 import { checkFaultyComparison } from "~/utils/parseComparison";
 
 export const config = { runtime: "edge" };
+
+const createProductFromSearchDataAndReviews = async (
+  product: ProductSearchData,
+  reviews: ReviewSearchData[]
+): Promise<ProductLocal> => {
+  const category = await getCorrectCategory(product);
+
+  return {
+    asin: product.asin,
+    title: product.product_title,
+    price: product.product_price,
+    originalPrice: product.product_original_price,
+    starRating: product.product_star_rating,
+    numRatings: product.product_num_ratings,
+    url: product.product_url,
+    photo: product.product_photo,
+    slug: createSlugFromTitle(product.product_title),
+    reviews: reviews.map((review) => ({ comment: review.review_comment })),
+    categorySlug: category.slug,
+  };
+};
 
 const updateProductFromCacheWithAsin = async (asin: string) => {
   const prod = await redisRestGet<ProductSearchData>(
@@ -72,7 +97,10 @@ const fetchProductWithReviews = async (asin: string) => {
   reviews.sort(reviewsSortFromShortestToLongest);
   const reviewsLimited = limitReviewsCount(reviews);
 
-  const prodLocal = createProductFromSearchDataAndReviews(prod, reviewsLimited);
+  const prodLocal = await createProductFromSearchDataAndReviews(
+    prod,
+    reviewsLimited
+  );
 
   // not awaiting for speed
   insertProductWithReviews(prodLocal).catch((err: unknown) => {
@@ -138,7 +166,7 @@ export default async function handler(req: Request): Promise<Response> {
           break;
         }
       }
-      await insertComparison(prod1Clean.asin, prod2Clean.asin, finalVal);
+      await insertComparison(prod1Clean, prod2Clean, finalVal);
       log.info(
         `inserting the comparison result for products:, ${prod1Clean.asin}, ${prod2Clean.asin}`
       );

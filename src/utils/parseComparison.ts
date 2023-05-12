@@ -23,7 +23,7 @@ const extractList = (regex: RegExp, text: string): string[] => {
 };
 
 export const parseComparison = (text: string) => {
-  const introRegex = /Introduction:\n([\s\S]*?)(?=\n([^a-zA-Z\d]*?)Product|$)/;
+  const introRegex = /Introduction:([\s\S]*?)(?=\n([^a-zA-Z\d]*?)Product|$)/;
   const product1ProsRegex =
     /Product 1:[\s\S]*?Pros:\n\s*-\s+([\s\S]*?)(?=\n([^a-zA-Z\d]*?)Cons|$)/;
   const product1ConsRegex =
@@ -32,7 +32,7 @@ export const parseComparison = (text: string) => {
     /Product 2:[\s\S]*?Pros:\n\s*-\s+([\s\S]*?)(?=\n([^a-zA-Z\d]*?)Cons|$)/;
   const product2ConsRegex =
     /Product 2:[\s\S]*?Cons:\n\s*-\s+([\s\S]*?)(?=\n([^a-zA-Z\d]*?)Conclusion|$)/;
-  const conclusionRegex = /Conclusion:\n([\s\S]*?)(?=$|$)/;
+  const conclusionRegex = /Conclusion:([\s\S]*?)(?=$|$)/;
 
   const intro = extractText(introRegex, text);
   const product1Pros = extractList(product1ProsRegex, text);

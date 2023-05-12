@@ -1,3 +1,5 @@
+import type { Category } from "@prisma/client";
+
 export const WebsiteName = "Compareit.ai";
 
 export const revalidationTimersInSec = {
@@ -25,7 +27,7 @@ export const TIMEOUTS_SEC = {
 export const RATE_LIMIT_REQUESTS_PER_10_SEC = 5;
 export const UNKNOWN_IP = "UNKNOWN_IP";
 
-export const CATEGORIES = [
+export const CATEGORIES_UNUSED = [
   "Appliances",
   "Apps & Games",
   "Arts, Crafts & Sewing",
@@ -40,7 +42,6 @@ export const CATEGORIES = [
   "Men",
   "Girls",
   "Boys",
-  "Baby",
   "Collectibles & Fine Art",
   "Computers",
   "Credit and Payment Cards",
@@ -71,3 +72,5 @@ export const CATEGORIES = [
   "Video Games",
   "Random",
 ] as const;
+
+export const RANDOM_CAT: Category = { name: "Random", slug: "random" };

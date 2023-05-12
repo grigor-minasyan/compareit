@@ -9,6 +9,7 @@ const redis = new Redis({
 });
 
 export const CACHE_KEY = {
+  CATEGORIES: "CATEGORIES",
   RATELIMIT: "RATELIMIT",
   AMZ_API_PRODUCT: (asin: string) => `AMZ_API_PRODUCT:${asin}`,
   AMZ_API_PRODUCT_QUERY: (query: string) => `AMZ_API_PRODUCT_QUERY:${query}`,

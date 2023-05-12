@@ -10,7 +10,13 @@ import { backOff } from "exponential-backoff";
 import { CACHE_KEY, redisRestGet, redisRestSetInPipeline } from "./redis";
 import { redisRestSet } from "./redis";
 import { log } from "next-axiom";
+import { distance, closest } from "fastest-levenshtein";
 import { serializeError } from "serialize-error";
+import type { Category } from "@prisma/client";
+import { fetchCategoriesFromDb } from "./dbPlanetscale";
+import { OpenAIDirect } from "~/utils/OpenAIStream";
+import { generatePromptToGetProductCategory } from "~/utils/promptUtils";
+import { RANDOM_CAT } from "~/constants";
 
 const AMAZON_API_BASE_URL = "https://real-time-amazon-data.p.rapidapi.com";
 
@@ -161,5 +167,46 @@ export const AmazonApiReviews = async (
         return true;
       },
     }
+  );
+};
+
+export const fetchCategoriesFromRedis = async (): Promise<Category[]> => {
+  const cached = await redisRestGet<Category[]>(CACHE_KEY.CATEGORIES);
+  if (cached) {
+    log.info("fetchCategoriesFromRedis: returning cached results");
+    return cached;
+  }
+
+  const categories = await fetchCategoriesFromDb();
+  redisRestSet(CACHE_KEY.CATEGORIES, categories).catch((e: unknown) => {
+    log.error(
+      "fetchCategoriesFromRedis: failed to cache categories",
+      serializeError(e)
+    );
+  });
+
+  return categories;
+};
+
+export const getCorrectCategory = async (
+  product: ProductSearchData
+): Promise<Category> => {
+  const categories = await fetchCategoriesFromRedis();
+  const prompt = generatePromptToGetProductCategory(product, categories);
+  const openAIresult = (await OpenAIDirect(prompt)).toLowerCase().trim();
+
+  const closestCategory = closest(
+    openAIresult,
+    categories.map((c) => c.name.toLowerCase())
+  );
+
+  const score = distance(openAIresult, closestCategory);
+  if (score > 2) {
+    return RANDOM_CAT;
+  }
+
+  return (
+    categories.find((c) => c.name.toLowerCase() === closestCategory) ||
+    RANDOM_CAT
   );
 };

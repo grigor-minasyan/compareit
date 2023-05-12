@@ -77,9 +77,9 @@ export async function OpenAIStream(prompt: string) {
 }
 
 export async function OpenAIDirect(prompt: string) {
-  const res = await backOff(
-    () =>
-      fetch("https://api.openai.com/v1/chat/completions", {
+  return backOff(
+    async () => {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${env.OPENAI_API_KEY}`,
@@ -94,7 +94,19 @@ export async function OpenAIDirect(prompt: string) {
           presence_penalty: 0,
           n: 1,
         }),
-      }),
+      });
+
+      const json = (await res.json()) as unknown as {
+        choices?: { message: { content: string } }[];
+      };
+      const text = json.choices?.[0]?.message.content || "";
+      if (!text) {
+        throw new Error(
+          `No text returned from OpenAI, ${JSON.stringify(json)}}`
+        );
+      }
+      return text;
+    },
     {
       jitter: "full",
       retry(e: unknown, attemptNumber) {
@@ -106,13 +118,4 @@ export async function OpenAIDirect(prompt: string) {
       },
     }
   );
-
-  const json = (await res.json()) as unknown as {
-    choices: { message: { content: string } }[];
-  };
-  const text = json.choices[0]?.message.content || "";
-  if (!text) {
-    throw new Error("No text returned from OpenAI");
-  }
-  return text;
 }

@@ -1,5 +1,10 @@
+import type { Category } from "@prisma/client";
 import { CHAR_PER_TOKEN_RATIO } from "~/constants";
-import type { ProductLocal, ProductWithReviews } from "~/types";
+import type {
+  ProductLocal,
+  ProductSearchData,
+  ProductWithReviews,
+} from "~/types";
 
 export const generatePromptFromProducts = (
   products: (ProductLocal | ProductWithReviews)[]
@@ -29,4 +34,26 @@ export const calculateStringTokens = (str: string) => {
 
 export const tokenToStringLength = (tokens: number) => {
   return Math.round(tokens * CHAR_PER_TOKEN_RATIO);
+};
+
+export const generatePromptToGetProductCategory = (
+  product: ProductSearchData,
+  categories: Category[]
+) => {
+  return `Your task is to figure out the category of this product based on the title. Output only the category exactly as you see. The product title is: ${
+    product.product_title
+  }. The categories are:
+  ${categories.map(({ name }) => `${name}\n`).join(", ")}.`;
+};
+
+export const generatePromptForComparisonSlug = (
+  prod1: ProductLocal,
+  prod2: ProductLocal
+) => {
+  return `Give me a url friendly slug for a comparison article between these 2 products. Stay below 70 characters.
+
+  Product 1: ${prod1.title}
+  
+  Product 2: ${prod2.title}
+  `;
 };

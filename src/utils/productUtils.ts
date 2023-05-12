@@ -6,32 +6,16 @@ import type {
 } from "~/types";
 import {
   calculateStringTokens,
+  generatePromptForComparisonSlug,
   generatePromptToShortenReview,
 } from "./promptUtils";
 import { OpenAIDirect } from "./OpenAIStream";
 import { log } from "next-axiom";
-
-export const createProductFromSearchDataAndReviews = (
-  product: ProductSearchData,
-  reviews: ReviewSearchData[]
-): ProductLocal => {
-  return {
-    asin: product.asin,
-    title: product.product_title,
-    price: product.product_price,
-    originalPrice: product.product_original_price,
-    starRating: product.product_star_rating,
-    numRatings: product.product_num_ratings,
-    url: product.product_url,
-    photo: product.product_photo,
-    slug: createSlugFromTitle(product.product_title),
-    reviews: reviews.map((review) => ({ comment: review.review_comment })),
-  };
-};
+import { v4 as uuidV4 } from "uuid";
 
 export const createProductFromSearchData = (
   product: ProductSearchData
-): Omit<ProductLocal, "reviews"> => {
+): Omit<ProductLocal, "reviews" | "categorySlug"> => {
   return {
     asin: product.asin,
     title: product.product_title,
@@ -51,6 +35,7 @@ export const createSlugFromTitle = (title: string) => {
     .replace(/-/g, " ")
     .replace(/[^a-zA-Z0-9]/g, " ")
     .replace(/\s+/g, " ")
+    .trim()
     .replace(/[^a-z0-9]/g, "-");
 };
 
@@ -60,6 +45,16 @@ export const shortenReviewIfNeeded = async (review: ReviewSearchData) => {
       generatePromptToShortenReview(review.review_comment)
     );
   }
+};
+
+export const createComparisonSlugFromProducts = async (
+  prod1: ProductLocal,
+  prod2: ProductLocal
+) => {
+  const prompt = generatePromptForComparisonSlug(prod1, prod2);
+  const slug = await OpenAIDirect(prompt);
+  const cleanSlug = createSlugFromTitle(slug) + "-" + uuidV4().slice(-7);
+  return cleanSlug;
 };
 
 export const limitReviewsCount = (reviews: ReviewSearchData[]) => {

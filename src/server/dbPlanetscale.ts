@@ -1,16 +1,20 @@
 import { connect } from "@planetscale/database";
-import type { Comparison, Product, Review } from "@prisma/client";
+import type { Category, Comparison, Product, Review } from "@prisma/client";
+import { RANDOM_CAT } from "~/constants";
 import { env } from "~/env.mjs";
 import type { ProductLocal, ProductWithReviews } from "~/types";
-import { sortProdIdsStr } from "~/utils/productUtils";
+import {
+  createComparisonSlugFromProducts,
+  sortProdIdsStr,
+} from "~/utils/productUtils";
 
 const dbRestConn = connect({ url: env.DATABASE_URL });
 
 export const insertProductWithReviews = async (product: ProductLocal) => {
   return dbRestConn.transaction(async (tx) => {
     await tx.execute(
-      `INSERT INTO Product (createdAt, updatedAt, asin, title, price, originalPrice, starRating, numRatings, url, photo, slug)
-      VALUES (NOW(), NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+      `INSERT INTO Product (createdAt, updatedAt, asin, title, price, originalPrice, starRating, numRatings, url, photo, slug, categorySlug)
+      VALUES (NOW(), NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
       [
         product.asin,
         product.title,
@@ -21,6 +25,7 @@ export const insertProductWithReviews = async (product: ProductLocal) => {
         product.url,
         product.photo,
         product.slug,
+        product.categorySlug,
       ]
     );
 
@@ -35,7 +40,7 @@ export const insertProductWithReviews = async (product: ProductLocal) => {
 };
 
 export const updateProductDetails = async (
-  product: Omit<ProductLocal, "reviews">
+  product: Omit<ProductLocal, "reviews" | "categorySlug">
 ) => {
   return dbRestConn.execute(
     `UPDATE Product SET updatedAt = NOW(), title = ?, price = ?, originalPrice = ?, starRating = ?, numRatings = ?, url = ?, photo = ?, slug = ?
@@ -77,14 +82,22 @@ export const fetchProductWithReviewsFromDb = async (asin: string) => {
 };
 
 export const insertComparison = async (
-  asin1: string,
-  asin2: string,
+  prod1: ProductLocal,
+  prod2: ProductLocal,
   comparisonText: string
 ) => {
+  const slug = await createComparisonSlugFromProducts(prod1, prod2);
   return dbRestConn.execute(
-    `INSERT INTO Comparison (createdAt, updatedAt, product1Asin, product2Asin, comparisonText)
-      VALUES (NOW(), NOW(), ?, ?, ?);`,
-    [...[asin1, asin2].sort(sortProdIdsStr), comparisonText]
+    `INSERT INTO Comparison (createdAt, updatedAt, product1Asin, product2Asin, comparisonText, categorySlug, slug)
+      VALUES (NOW(), NOW(), ?, ?, ?, ?, ?);`,
+    [
+      ...[prod1.asin, prod2.asin].sort(sortProdIdsStr),
+      comparisonText,
+      prod1.categorySlug === prod2.categorySlug
+        ? prod1.categorySlug
+        : RANDOM_CAT.slug,
+      slug,
+    ]
   );
 };
 
@@ -101,4 +114,10 @@ export const fetchComparisonFromDb = async (
   const comparison = comparisonQuery.rows[0] as Comparison;
 
   return comparison.comparisonText;
+};
+
+export const fetchCategoriesFromDb = async (): Promise<Category[]> => {
+  const categoriesQuery = await dbRestConn.execute(`SELECT * from Category;`);
+
+  return categoriesQuery.rows as unknown as Category[];
 };
