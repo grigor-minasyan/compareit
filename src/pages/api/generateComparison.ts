@@ -84,14 +84,12 @@ const fetchProductWithReviews = async (asin: string) => {
     return null;
   }
 
-  const [reviewsPg1, reviewsPg2, reviewsPg3, reviewsPg4] = await Promise.all([
+  const [reviewsPg1, reviewsPg2] = await Promise.all([
     AmazonApiReviews(asin),
     AmazonApiReviews(asin, 2),
-    AmazonApiReviews(asin, 3),
-    AmazonApiReviews(asin, 4),
   ]);
 
-  const reviews = [...reviewsPg1, ...reviewsPg2, ...reviewsPg3, ...reviewsPg4];
+  const reviews = [...reviewsPg1, ...reviewsPg2];
   // TODO calculate how much token is used for this and store it in the db for later analytics
   await Promise.all(reviews.map(shortenReviewIfNeeded));
   reviews.sort(reviewsSortFromShortestToLongest);

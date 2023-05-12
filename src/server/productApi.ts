@@ -86,7 +86,7 @@ export const AmazonApiSearch = async (
     {
       jitter: "full",
       retry(e: unknown, attemptNumber) {
-        log.error(
+        log[attemptNumber === 10 ? "error" : "warn"](
           `AmazonApiSearch: Attempt #${attemptNumber} failed. Error:`,
           serializeError(e)
         );
@@ -160,7 +160,7 @@ export const AmazonApiReviews = async (
     {
       jitter: "full",
       retry(e: unknown, attemptNumber) {
-        log.error(
+        log[attemptNumber === 10 ? "error" : "warn"](
           `AmazonApiReviews: Attempt #${attemptNumber} failed. Error:`,
           serializeError(e)
         );

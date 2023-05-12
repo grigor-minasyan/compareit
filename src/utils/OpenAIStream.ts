@@ -110,7 +110,7 @@ export async function OpenAIDirect(prompt: string) {
     {
       jitter: "full",
       retry(e: unknown, attemptNumber) {
-        log.error(
+        log[attemptNumber === 10 ? "error" : "warn"](
           `OpenAIDirect: Attempt #${attemptNumber} failed. Error:`,
           serializeError(e)
         );
