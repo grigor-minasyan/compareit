@@ -74,3 +74,10 @@ export const CATEGORIES_UNUSED = [
 ] as const;
 
 export const RANDOM_CAT: Category = { name: "Random", slug: "random" };
+
+export const LOADING_BAR_TEXTS = [
+  "Searching for product details...",
+  "Looking for customer reviews...",
+  "Summarizing reviews...",
+  "Generating comparison based on reviews...",
+];

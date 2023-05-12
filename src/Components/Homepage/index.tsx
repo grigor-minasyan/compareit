@@ -1,19 +1,33 @@
-import { useState, type FormEventHandler } from "react";
+import { useState, type FormEventHandler, useEffect } from "react";
 import { api } from "~/utils/api";
 import { useHomeStore } from "~/state";
 import { SearchInput } from "./SearchInput";
 import { SearchButton } from "./SearchButton";
 import { SearchResultsWrapper } from "./SearchResultsWrapper";
 import { TopCurves } from "./TopCurves";
-import { WebsiteName } from "~/constants";
+import { LOADING_BAR_TEXTS, WebsiteName } from "~/constants";
 import { ComparisonResults } from "./ComparisonResults";
 
 const LoadingBar = () => {
+  const [loadingTextIndex, setLoadingTextIndex] = useState(0);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setLoadingTextIndex((prev) => (prev + 1) % LOADING_BAR_TEXTS.length);
+    }, 1500);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
   return (
     <div className="my-2 w-full">
       <div className="flex animate-pulse">
         <div className="flex-1">
-          <div className="h-3 rounded bg-purple-600"></div>
+          <div className="flex justify-center rounded bg-purple-600 p-1 text-white">
+            {LOADING_BAR_TEXTS[loadingTextIndex]}
+          </div>
         </div>
       </div>
     </div>

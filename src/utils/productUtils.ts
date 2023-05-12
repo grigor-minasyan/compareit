@@ -90,7 +90,7 @@ export const getStreamFromString = (str: string) => {
   const chunks: string[] = [];
   let remaining = str;
   while (remaining.length > 0) {
-    const chunkLength = Math.floor(Math.random() * 10) + 5;
+    const chunkLength = Math.floor(Math.random() * 15) + 10;
     chunks.push(remaining.slice(0, chunkLength));
     remaining = remaining.slice(chunkLength);
   }
@@ -102,7 +102,7 @@ export const getStreamFromString = (str: string) => {
       for (const str of chunks) {
         const data = encoder.encode(str);
         controller.enqueue(data);
-        await new Promise((resolve) => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 25));
       }
       controller.close();
     },
