@@ -6,7 +6,10 @@ import type { Product } from "@prisma/client";
 import { useHomeStore } from "~/state";
 import type { ProductNum, ProductSearchData } from "~/types";
 import { parseComparison } from "~/utils/parseComparison";
-import { createProductSearchDataFromProduct } from "~/utils/productUtils";
+import {
+  createProductSearchDataFromProduct,
+  getAffiliateLinkFromProduct,
+} from "~/utils/productUtils";
 
 export const ComparisonResults = ({
   comparisonResult,
@@ -23,7 +26,7 @@ export const ComparisonResults = ({
   const product2SearchData =
     product2 && createProductSearchDataFromProduct(product2);
   return (
-    <div className="mx-1 mt-8">
+    <div className="mx-0 mt-8">
       <p className="whitespace-pre-line text-lg">{parsed.introduction}</p>
       <ProConList
         list={parsed.product1Pros}
@@ -75,14 +78,14 @@ const ProConList = ({
       {proOrCon === "Pros" && (
         <div className="flex flex-col md:flex-row">
           <a
-            href={product.product_url}
+            href={getAffiliateLinkFromProduct(product)}
             target="_blank"
             className="text-violet-600"
           >
             <h2 className="mb-1 text-lg font-bold">{product.product_title}</h2>
           </a>
           <a
-            href={product.product_url}
+            href={getAffiliateLinkFromProduct(product)}
             target="_blank"
             className="flex justify-center rounded-xl bg-violet-500 px-8 py-2.5 text-center align-middle text-sm text-white hover:bg-violet-700 md:ml-4 md:w-80"
           >
@@ -90,6 +93,7 @@ const ProConList = ({
               <span>
                 {"Buy now on Amazon.com for "}
                 <span className="font-bold">{product.product_price}</span>
+                {/* TODO add product rating and review count inside the buy button */}
               </span>
             </div>
           </a>

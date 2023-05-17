@@ -16,7 +16,7 @@ import type { Category } from "@prisma/client";
 import { fetchCategoriesFromDb } from "./dbPlanetscale";
 import { OpenAIDirect } from "~/utils/OpenAIStream";
 import { generatePromptToGetProductCategory } from "~/utils/promptUtils";
-import { RANDOM_CAT } from "~/constants";
+import { RANDOM_CAT, backOffOptions } from "~/constants";
 
 const AMAZON_API_BASE_URL = "https://real-time-amazon-data.p.rapidapi.com";
 
@@ -48,52 +48,40 @@ export const AmazonApiSearch = async (
     },
   };
 
-  return backOff(
-    async () => {
-      const res = await fetch(url, options);
-      const json = (await res.json()) as unknown;
-      const productSearchResults = await ZProductSearchApiResponse.parseAsync(
-        json
-      );
-      const productParseRes = await Promise.all(
-        productSearchResults.data.products.map((product) =>
-          ZProductSearchData.safeParseAsync(product)
-        )
-      );
+  return backOff(async () => {
+    const res = await fetch(url, options);
+    const json = (await res.json()) as unknown;
+    const productSearchResults = await ZProductSearchApiResponse.parseAsync(
+      json
+    );
+    const productParseRes = await Promise.all(
+      productSearchResults.data.products.map((product) =>
+        ZProductSearchData.safeParseAsync(product)
+      )
+    );
 
-      const finalRes: ProductSearchData[] = [];
-      const seenAsins = new Set<string>();
-      for (const res of productParseRes) {
-        if (res.success && !seenAsins.has(res.data.asin)) {
-          finalRes.push(res.data);
-          seenAsins.add(res.data.asin);
-        }
+    const finalRes: ProductSearchData[] = [];
+    const seenAsins = new Set<string>();
+    for (const res of productParseRes) {
+      if (res.success && !seenAsins.has(res.data.asin)) {
+        finalRes.push(res.data);
+        seenAsins.add(res.data.asin);
       }
-
-      await redisRestSetInPipeline([
-        [CACHE_KEY.AMZ_API_PRODUCT_QUERY(query), finalRes],
-        ...finalRes.map(
-          (product) =>
-            [CACHE_KEY.AMZ_API_PRODUCT(product.asin), product] as [
-              string,
-              unknown
-            ]
-        ),
-      ]);
-
-      return finalRes;
-    },
-    {
-      jitter: "full",
-      retry(e: unknown, attemptNumber) {
-        log[attemptNumber === 10 ? "error" : "warn"](
-          `AmazonApiSearch: Attempt #${attemptNumber} failed. Error:`,
-          serializeError(e)
-        );
-        return true;
-      },
     }
-  );
+
+    await redisRestSetInPipeline([
+      [CACHE_KEY.AMZ_API_PRODUCT_QUERY(query), finalRes],
+      ...finalRes.map(
+        (product) =>
+          [CACHE_KEY.AMZ_API_PRODUCT(product.asin), product] as [
+            string,
+            unknown
+          ]
+      ),
+    ]);
+
+    return finalRes;
+  }, backOffOptions);
 };
 
 export const AmazonApiReviews = async (
@@ -132,42 +120,30 @@ export const AmazonApiReviews = async (
     },
   };
 
-  return backOff(
-    async () => {
-      const res = await fetch(url, options);
-      const data = (await res.json()) as unknown;
-      const cleanRes = await ZReviewSearchApiResponse.parseAsync(data);
-      const reviewParseRes = await Promise.all(
-        cleanRes.data.reviews.map((review) =>
-          ZReviewSearchData.safeParseAsync(review)
-        )
-      );
-      const seenReviewIds = new Set<string>();
-      const parsedReviews = [];
-      for (const res of reviewParseRes) {
-        if (res.success && !seenReviewIds.has(res.data.review_id)) {
-          parsedReviews.push(res.data);
-          seenReviewIds.add(res.data.review_id);
-        }
+  return backOff(async () => {
+    const res = await fetch(url, options);
+    const data = (await res.json()) as unknown;
+    const cleanRes = await ZReviewSearchApiResponse.parseAsync(data);
+    const reviewParseRes = await Promise.all(
+      cleanRes.data.reviews.map((review) =>
+        ZReviewSearchData.safeParseAsync(review)
+      )
+    );
+    const seenReviewIds = new Set<string>();
+    const parsedReviews = [];
+    for (const res of reviewParseRes) {
+      if (res.success && !seenReviewIds.has(res.data.review_id)) {
+        parsedReviews.push(res.data);
+        seenReviewIds.add(res.data.review_id);
       }
-
-      await redisRestSet(
-        CACHE_KEY.AMZ_API_PRODUCT_REVIEWS(asin, page),
-        parsedReviews
-      );
-      return parsedReviews;
-    },
-    {
-      jitter: "full",
-      retry(e: unknown, attemptNumber) {
-        log[attemptNumber === 10 ? "error" : "warn"](
-          `AmazonApiReviews: Attempt #${attemptNumber} failed. Error:`,
-          serializeError(e)
-        );
-        return true;
-      },
     }
-  );
+
+    await redisRestSet(
+      CACHE_KEY.AMZ_API_PRODUCT_REVIEWS(asin, page),
+      parsedReviews
+    );
+    return parsedReviews;
+  }, backOffOptions);
 };
 
 export const fetchCategoriesFromRedis = async (): Promise<Category[]> => {

@@ -4,8 +4,7 @@ import {
   type ReconnectInterval,
 } from "eventsource-parser";
 import { backOff } from "exponential-backoff";
-import { log } from "next-axiom";
-import { serializeError } from "serialize-error";
+import { backOffOptions } from "~/constants";
 import { env } from "~/env.mjs";
 
 export async function OpenAIStream(prompt: string) {
@@ -77,45 +76,31 @@ export async function OpenAIStream(prompt: string) {
 }
 
 export async function OpenAIDirect(prompt: string) {
-  return backOff(
-    async () => {
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${env.OPENAI_API_KEY}`,
-        },
-        method: "POST",
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0.6,
-          top_p: 1,
-          frequency_penalty: 0,
-          presence_penalty: 0,
-          n: 1,
-        }),
-      });
-
-      const json = (await res.json()) as unknown as {
-        choices?: { message: { content: string } }[];
-      };
-      const text = json.choices?.[0]?.message.content || "";
-      if (!text) {
-        throw new Error(
-          `No text returned from OpenAI, ${JSON.stringify(json)}}`
-        );
-      }
-      return text;
-    },
-    {
-      jitter: "full",
-      retry(e: unknown, attemptNumber) {
-        log[attemptNumber === 10 ? "error" : "warn"](
-          `OpenAIDirect: Attempt #${attemptNumber} failed. Error:`,
-          serializeError(e)
-        );
-        return true;
+  return backOff(async () => {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${env.OPENAI_API_KEY}`,
       },
+      method: "POST",
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.6,
+        top_p: 1,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+        n: 1,
+      }),
+    });
+
+    const json = (await res.json()) as unknown as {
+      choices?: { message: { content: string } }[];
+    };
+    const text = json.choices?.[0]?.message.content || "";
+    if (!text) {
+      throw new Error(`No text returned from OpenAI, ${JSON.stringify(json)}}`);
     }
-  );
+    return text;
+  }, backOffOptions);
 }

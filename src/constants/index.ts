@@ -1,4 +1,7 @@
 import type { Category } from "@prisma/client";
+import type { backOff } from "exponential-backoff";
+import { log } from "next-axiom";
+import { serializeError } from "serialize-error";
 
 export const WebsiteName = "Compareit.ai";
 
@@ -81,3 +84,16 @@ export const LOADING_BAR_TEXTS = [
   "Summarizing reviews...",
   "Generating comparison based on reviews...",
 ];
+
+export const backOffOptions: Parameters<typeof backOff>[1] = {
+  jitter: "full",
+  retry(e: unknown, attemptNumber) {
+    log[attemptNumber === 10 ? "error" : "warn"](
+      `Backoff attempt #${attemptNumber} failed. Error:`,
+      serializeError(e)
+    );
+    return true;
+  },
+};
+
+export const SLUG_RAND_ID_SUFFIX_LENGTH = 7;
