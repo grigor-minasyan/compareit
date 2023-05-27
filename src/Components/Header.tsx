@@ -10,6 +10,10 @@ const navigation = [
     name: "Test comparison",
     href: "/comparison/logitech-g502-vs-m510-mouse-comparison-76b5c2a",
   },
+  {
+    name: "Recent comparisons",
+    href: "/recent-comparisons/page/1",
+  },
 ];
 
 function classNames(...classes: string[]) {

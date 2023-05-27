@@ -8,13 +8,6 @@ import { AmazonApiSearch } from "~/server/productApi";
 import { rateLimit } from "~/server/redis";
 
 export const homeRouter = createTRPCRouter({
-  hello: publicProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
-      return {
-        greeting: `Hello ${input.text}`,
-      };
-    }),
   searchProducts: publicProcedure
     .input(z.object({ prod1name: z.string(), prod2name: z.string() }))
     .mutation(async ({ input, ctx }) => {

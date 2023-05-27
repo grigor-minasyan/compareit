@@ -97,3 +97,6 @@ export const backOffOptions: Parameters<typeof backOff>[1] = {
 };
 
 export const SLUG_RAND_ID_SUFFIX_LENGTH = 7;
+
+export const MAX_PAGE_SIZE = 3;
+export const MAX_PAGES = 3;
