@@ -10,7 +10,10 @@ const Home: NextPage = () => {
         <title>
           {`${WebsiteName} - AI powered product comparison based on real customer reviews`}
         </title>
-        <meta name="description" content="LOGO DESC" />
+        <meta
+          name="description"
+          content={`${WebsiteName} - AI powered product comparison based on real customer reviews`}
+        />
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, maximum-scale=1"

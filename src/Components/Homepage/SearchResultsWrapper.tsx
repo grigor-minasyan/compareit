@@ -64,7 +64,7 @@ export const SearchResultsWrapper = ({
               className="h-10 w-full rounded-xl bg-violet-900 text-white"
               onClick={() => showMore(productNum)}
             >
-              Load more
+              Show more
             </button>
           </div>
         )}

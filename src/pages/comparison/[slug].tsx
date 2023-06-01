@@ -1,9 +1,9 @@
-import type { Prisma, Product } from "@prisma/client";
-import type { GetStaticProps } from "next";
+import type { Prisma } from "@prisma/client";
+import type { GetStaticPaths, GetStaticProps } from "next";
 import { log } from "next-axiom";
 import Head from "next/head";
-import Image from "next/image";
 import { serializeError } from "serialize-error";
+import { CompareComparisonImagesLarge } from "~/Components/CompareComparisonImages";
 import {
   ContainerForComparisonResults,
   ContainerLevel1,
@@ -11,6 +11,8 @@ import {
 } from "~/Components/Containers";
 import { ComparisonResults } from "~/Components/Homepage/ComparisonResults";
 import {
+  MAX_PAGES_COUNT,
+  MAX_PAGE_SIZE,
   SLUG_RAND_ID_SUFFIX_LENGTH,
   WebsiteName,
   revalidationTimersInSec,
@@ -25,37 +27,8 @@ type Props = {
   }>;
 };
 
-const ImageComparisonSingle = ({ prod }: { prod: Product }) => {
-  return (
-    <div className="h-36 w-1/2 rounded-2xl bg-violet-100 p-2 sm:h-72">
-      <Image
-        className="z-20 h-full w-full rounded-xl bg-transparent object-contain object-center mix-blend-multiply"
-        src={prod.photo}
-        alt={prod.title}
-        width={400}
-        height={400}
-      />
-    </div>
-  );
-};
-
-const ImageComparison = ({
-  prod1,
-  prod2,
-}: {
-  prod1: Product;
-  prod2: Product;
-}) => {
-  return (
-    <div className="mb-4 flex w-full  items-center justify-center">
-      <ImageComparisonSingle prod={prod1} />
-      <div className="relative flex items-center justify-center px-2 py-4">
-        <div className="absolute bottom-0 left-0 right-0 top-0 z-0 rotate-45 transform rounded-xl bg-violet-700"></div>
-        <div className="relative z-10 text-3xl font-bold text-white">VS</div>
-      </div>
-      <ImageComparisonSingle prod={prod2} />
-    </div>
-  );
+type Params = {
+  slug: string;
 };
 
 export default function Comparison({ comparison }: Props) {
@@ -88,7 +61,7 @@ export default function Comparison({ comparison }: Props) {
       </Head>
       <ContainerLevel2>
         <ContainerForComparisonResults>
-          <ImageComparison
+          <CompareComparisonImagesLarge
             prod1={comparison.product1}
             prod2={comparison.product2}
           />
@@ -119,7 +92,7 @@ export default function Comparison({ comparison }: Props) {
 
 export const getStaticProps: GetStaticProps<Props> = async (context) => {
   try {
-    const { slug } = context.params as { slug: string };
+    const { slug } = context.params as Params;
     if (!slug) return { notFound: true };
     const comparison = await prisma.comparison.findUnique({
       where: { slug },
@@ -137,9 +110,20 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
   }
 };
 
-export function getStaticPaths() {
+export const getStaticPaths: GetStaticPaths<Params> = async () => {
+  const comparisonSlugs = await prisma.comparison.findMany({
+    take: MAX_PAGE_SIZE * MAX_PAGES_COUNT,
+    orderBy: { updatedAt: "desc" },
+    select: { slug: true },
+  });
+
   // We'll pre-render only these paths at build time.
   // { fallback: 'blocking' } will server-render pages
   // on-demand if the path doesn't exist.
-  return { paths: [], fallback: "blocking" };
-}
+  return {
+    paths: comparisonSlugs.map(({ slug }) => ({
+      params: { slug },
+    })),
+    fallback: "blocking",
+  };
+};

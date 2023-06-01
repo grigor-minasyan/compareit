@@ -7,10 +7,6 @@ import Image from "next/image";
 const navigation = [
   { name: "Home", href: "/" },
   {
-    name: "Test comparison",
-    href: "/comparison/logitech-g502-vs-m510-mouse-comparison-76b5c2a",
-  },
-  {
     name: "Recent comparisons",
     href: "/recent-comparisons/page/1",
   },
@@ -44,7 +40,7 @@ export default function Header() {
                 <div className="flex flex-shrink-0 items-center">
                   <Image
                     className="h-8 w-auto"
-                    src="/Compareit-A-100x300.png"
+                    src="/Compareit-logo-cropped-white-big.png"
                     alt="Your Company"
                     width={300}
                     height={100}
