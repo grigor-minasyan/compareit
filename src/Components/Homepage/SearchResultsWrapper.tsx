@@ -8,9 +8,21 @@ export const SearchResultsWrapper = ({
 }: {
   productNum: ProductNum;
 }) => {
-  const productSearchResult = useHomeStore(
-    (state) => state.productSearchResult[productNum]
+  const productSearchResult = useHomeStore((state) =>
+    state.productSearchResult[productNum].slice(
+      0,
+      Math.min(
+        state.productSearchResultLimit[productNum],
+        state.productSearchResult[productNum].length
+      )
+    )
   );
+  const hasMore = useHomeStore(
+    (state) =>
+      productSearchResult.length < state.productSearchResult[productNum].length
+  );
+
+  const showMore = useHomeStore((state) => state.addProductSearchResultLimit);
   const isCollapsed = useHomeStore(
     (state) => state.searchResultCollapsed[productNum]
   );
@@ -46,6 +58,16 @@ export const SearchResultsWrapper = ({
             productNum={productNum}
           />
         ))}
+        {hasMore && (
+          <div className="sm:m-2">
+            <button
+              className="h-10 w-full rounded-xl bg-violet-900 text-white"
+              onClick={() => showMore(productNum)}
+            >
+              Load more
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

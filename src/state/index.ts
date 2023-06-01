@@ -10,6 +10,9 @@ interface HomeState {
   productSearchResult: {
     [key in ProductNum]: ProductSearchData[];
   };
+  productSearchResultLimit: {
+    [key in ProductNum]: number;
+  };
   selectedProductId: {
     [key in ProductNum]: string;
   };
@@ -24,6 +27,7 @@ interface HomeState {
     num: ProductNum,
     result: ProductSearchData[]
   ) => void;
+  addProductSearchResultLimit: (num: ProductNum) => void;
   setSelectedProductId: (num: ProductNum, productId: string) => void;
   setSelectedProductForComparison: (
     num: ProductNum,
@@ -45,6 +49,10 @@ export const useHomeStore = create<HomeState>()(
     productSearchResult: {
       "1": [],
       "2": [],
+    },
+    productSearchResultLimit: {
+      "1": 5,
+      "2": 5,
     },
     selectedProductId: {
       "1": "",
@@ -70,6 +78,17 @@ export const useHomeStore = create<HomeState>()(
         productSearchResult: {
           ...state.productSearchResult,
           [num]: result,
+        },
+        productSearchResultLimit: {
+          ...state.productSearchResultLimit,
+          [num]: 5,
+        },
+      })),
+    addProductSearchResultLimit: (num) =>
+      set((state) => ({
+        productSearchResultLimit: {
+          ...state.productSearchResultLimit,
+          [num]: state.productSearchResultLimit[num] + 5,
         },
       })),
     setSelectedProductId: (num, productId) =>
