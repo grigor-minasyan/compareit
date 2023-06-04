@@ -7,6 +7,7 @@ export const WebsiteName = "Compareit.ai";
 
 export const revalidationTimersInSec = {
   jointComparison: 60 * 60 * 24, // 24 hours
+  recentComparisons: 60 * 60, // 1 hour
 } as const;
 
 // trying to stay within 4096 total tokens for prompt and response

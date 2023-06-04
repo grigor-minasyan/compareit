@@ -10,7 +10,7 @@ const navigation = [
     name: "Recent comparisons",
     href: "/recent-comparisons/page/1",
   },
-];
+] as const;
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -37,15 +37,17 @@ export default function Header() {
                 </Disclosure.Button>
               </div>
               <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-                <div className="flex flex-shrink-0 items-center">
-                  <Image
-                    className="h-8 w-auto"
-                    src="/Compareit-logo-cropped-white-big.png"
-                    alt="Your Company"
-                    width={300}
-                    height={100}
-                  />
-                </div>
+                <Link href={navigation[0].href}>
+                  <div className="flex flex-shrink-0 items-center">
+                    <Image
+                      className="h-8 w-auto"
+                      src="/Compareit-logo-cropped-white-big.png"
+                      alt="Your Company"
+                      width={300}
+                      height={100}
+                    />
+                  </div>
+                </Link>
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
                     {navigation.map((item) => (

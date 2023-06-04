@@ -13,6 +13,7 @@ import {
   MAX_PAGE_SIZE,
   SLUG_RAND_ID_SUFFIX_LENGTH,
   WebsiteName,
+  revalidationTimersInSec,
 } from "~/constants";
 import { prisma } from "~/server/db";
 import { parseComparison } from "~/utils/parseComparison";
@@ -125,6 +126,7 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
 
     return {
       props: { comparisons, maxPageCount },
+      revalidate: revalidationTimersInSec.recentComparisons,
     };
   } catch (e) {
     log.error("getStaticProps error", serializeError(e));
