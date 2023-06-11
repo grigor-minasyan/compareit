@@ -1,5 +1,5 @@
 import { env } from "~/env.mjs";
-import ProductAdvertisingAPIv1 from "paapi5-nodejs-sdk";
+const ProductAdvertisingAPIv1 = require("paapi5-nodejs-sdk");
 import { AMAZON_ASSOCIATES_ID } from "~/constants";
 
 const defaultClient = ProductAdvertisingAPIv1.ApiClient.instance;
