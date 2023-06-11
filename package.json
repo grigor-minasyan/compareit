@@ -30,6 +30,7 @@
     "next": "^13.3.1",
     "next-axiom": "^0.17.0",
     "next-superjson-plugin": "^0.5.7",
+    "paapi5-nodejs-sdk": "github:grigor-minasyan/paapi5-nodejs-sdk",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "request-ip": "^3.3.0",

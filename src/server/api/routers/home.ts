@@ -4,6 +4,7 @@ import { z } from "zod";
 import { UNKNOWN_IP } from "~/constants";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+// import { PAAPIProductSearch } from "~/server/paapi";
 import { AmazonApiSearch } from "~/server/productApi";
 import { rateLimit } from "~/server/redis";
 
@@ -26,6 +27,9 @@ export const homeRouter = createTRPCRouter({
       prod2name = prod2name.toLowerCase().trim();
       if (prod1name === prod2name) {
         const prod1SearchResult = await AmazonApiSearch(prod1name);
+
+        // await PAAPIProductSearch(prod1name);
+
         return { "1": prod1SearchResult, "2": prod1SearchResult };
       } else {
         const [prod1SearchResult, prod2SearchResult] = await Promise.all([
