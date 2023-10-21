@@ -1,28 +1,46 @@
-# Create T3 App
+# Compareit.ai
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+Compareit.ai is a web application designed for efficient product comparison using customer reviews sourced from Amazon. It provides users with a modern, responsive, and visually appealing user interface powered by Next.js and TailwindCSS. The project also incorporates various technologies and tools to optimize performance and enhance the user experience.
 
-## What's next? How do I make an app with this?
+**Disclaimer**: The Compareit.ai website is currently disconnected from the Amazon Products API.
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+## Features
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+- **Efficient Product Comparison**: Compare products based on customer reviews from Amazon, allowing users to make informed decisions.
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+- **Modern UI Design**: The application is designed with a responsive and visually appealing user interface, thanks to TailwindCSS.
 
-## Learn More
+- **Optimized API Usage**: Redis is integrated for rate limiting and caching of third-party APIs, resulting in improved overall performance.
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+- **Intelligent Analysis**: OpenAI's GPT-3.5 chat completions are used to intelligently analyze and extract pros and cons for each product, providing valuable insights to users.
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+- **Real-time Response**: Server-Sent Events (SSE) are employed for real-time response delivery, ensuring a seamless and engaging user experience.
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+## Getting Started
 
-## How do I deploy this?
+To get started with Compareit.ai, follow these steps:
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+1. Clone this repository:
+
+git clone https://github.com/yourusername/compareit-ai.git
+
+
+2. Install the dependencies:
+
+npm install
+
+
+3. Start the development server:
+
+npm run dev
+
+
+4. Open your browser and visit [http://localhost:3000](http://localhost:3000) to access Compareit.ai.
+
+## Technologies Used
+
+- Next.js
+- TailwindCSS
+- Redis
+- OpenAI GPT-3.5
+- Server-Sent Events (SSE)
